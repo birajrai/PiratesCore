@@ -149,13 +149,7 @@
         </dependency> -->
         
         <!-- Use local ParticleNativeAPI.jar instead of Maven dependency -->
-        <dependency>
-            <groupId>com.github.fierioziy.particlenativeapi</groupId>
-            <artifactId>ParticleNativeAPI-core</artifactId>
-            <version>4.2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ParticleNativeAPI.jar</systemPath>
-        </dependency>
+        <!-- Dependency removed -->
         <!-- Remove Oraxen dependency if present -->
         <!-- <dependency>
             <groupId>io.th0rgal</groupId>
