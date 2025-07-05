@@ -8,15 +8,13 @@ import ovh.paulem.btm.listeners.MendingUseListener;
 import ovh.paulem.btm.listeners.PreventDestroyListener;
 import ovh.paulem.btm.config.ConfigManager;
 import ovh.paulem.btm.versioned.damage.DamageHandler;
-import ovh.paulem.btm.versioned.damage.DamageLegacy;
-import ovh.paulem.btm.managers.RepairManager;
 import ovh.paulem.btm.versioned.damage.DamageNewer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import ovh.paulem.btm.utils.PluginUtils;
 import ovh.paulem.btm.versioned.Versioning;
 import ovh.paulem.btm.versioned.playerconfig.PlayerConfigHandler;
-import ovh.paulem.btm.versioned.playerconfig.PlayerConfigLegacy;
+import ovh.paulem.btm.managers.RepairManager;
 
 public class BetterMending extends JavaPlugin {
     private static BetterMending instance;
@@ -42,7 +40,7 @@ public class BetterMending extends JavaPlugin {
         FileConfiguration config = getConfig();
 
         playerConfig = PlayerConfigHandler.of(this);
-        damageHandler = Versioning.isPost17() ? new DamageNewer() : new DamageLegacy();
+        damageHandler = new DamageNewer();
         repairManager = new RepairManager(this);
         configBlacklist = new ConfigBlacklist();
 

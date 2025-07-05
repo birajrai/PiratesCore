@@ -27,14 +27,6 @@ public class Versioning {
         return isPost(9);
     }
 
-    public static boolean isLegacy() {
-        return !isPost(12, 2);
-    }
-
-    public static boolean isIn13() {
-        return isPost(12, 2) && !isPost(13, 2);
-    }
-
     public static boolean isPost(int v) {
         String[] mcParts = getMcParts();
         return Integer.parseInt(mcParts[1]) > v || (Integer.parseInt(mcParts[1]) == v && Integer.parseInt(mcParts[2]) >= 1);

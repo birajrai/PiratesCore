@@ -8,6 +8,6 @@ public interface SoundsHandler {
     @Nullable Sound getEndermanTeleportSound();
 
     static SoundsHandler getSoundHandler() {
-        return Versioning.isLegacy() ? new SoundsLegacy() : new SoundsNewer();
+        return new SoundsNewer();
     }
 }

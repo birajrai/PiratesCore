@@ -20,7 +20,6 @@ import ovh.paulem.btm.BetterMending;
 import ovh.paulem.btm.utils.PluginUtils;
 
 public class ConfigUpdater {
-    private final boolean instantDeprecated = false; // Just an option to depecrate the config if the version is different
     private final int newVersion; // The next version of the Config
     private final BetterMending plugin;
 
@@ -36,12 +35,6 @@ public class ConfigUpdater {
 
     public void checkUpdate(int oldV) {
         path = new File(plugin.getDataFolder(), "config.yml");
-
-        if (instantDeprecated) {
-            if (oldV != newVersion)
-                deprecateConfig();
-            return;
-        }
 
         if (oldV == newVersion) {
             plugin.getLogger().info("The config is updated!");

@@ -48,24 +48,7 @@ public abstract class PlayerConfigHandler {
 
     public static PlayerConfigHandler of(BetterMending plugin) {
         dataFile = new File(plugin.getDataFolder(), "data.yml");
-
-        PlayerConfigHandler playerConfigHandler;
-
-        boolean fileBased = plugin.getConfig().getBoolean("file-based", false);
-        boolean dataFileExists = dataFile.exists();
-        boolean hasPDC = Versioning.hasPDC();
-
-        if (fileBased) { // If the file-based option is enabled, use the file-based system
-            playerConfigHandler = new PlayerConfigLegacy();
-        } else if (dataFileExists && hasPDC) { // If the data file exists and the server supports PDC, migrate the data file to PDC
-            playerConfigHandler = new PlayerConfigNewer(new PlayerConfigLegacy().migrate());
-        } else if (hasPDC) { // If the server supports PDC, use the PDC system
-            playerConfigHandler = new PlayerConfigNewer();
-        } else { // If the server doesn't support PDC, use the file-based system
-            playerConfigHandler = new PlayerConfigLegacy();
-        }
-
-        return playerConfigHandler;
+        return new PlayerConfigNewer();
     }
 
     public abstract @Nullable Boolean getPlayer(Player player);
