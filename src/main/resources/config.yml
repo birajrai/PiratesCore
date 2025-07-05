@@ -69,24 +69,17 @@ soundVolume: 1
 soundPitch: 1
 
 # -------- PARTICLES --------
-# Enable or disable the particles
-playEffect: true
-
-# The particles range from the player (suggested by Kad_L)
-range: 3
-
-# The color used for particles (RGB, each value need to be between 0 and 255)
-# default (in the order of color): 144, 238, 144
-color:
-  red: 144
-  green: 238
-  blue: 144
-
-# The offset of particles, from the player feet location. Can be a negative value
-offset:
-  x: 0.0
-  y: 0.0
-  z: 0.0
+# Particle effects have been removed from this plugin version.
+# playEffect: true
+# range: 3
+# color:
+#   red: 144
+#   green: 238
+#   blue: 144
+# offset:
+#   x: 0.0
+#   y: 0.0
+#   z: 0.0
 
 ## -------- BLACKLISTS --------
 
