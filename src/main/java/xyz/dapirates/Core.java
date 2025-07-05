@@ -1,8 +1,8 @@
-package ovh.paulem.btm;
+package xyz.dapirates;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import ovh.paulem.btm.features.BetterMending;
+import xyz.dapirates.features.BetterMending;
 
 public class Core extends JavaPlugin {
     @Override

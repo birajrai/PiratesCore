@@ -1,4 +1,4 @@
-package ovh.paulem.btm.features;
+package xyz.dapirates.features;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;

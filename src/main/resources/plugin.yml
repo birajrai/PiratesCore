@@ -1,14 +1,8 @@
-name: BetterMending
-main: ovh.paulem.btm.Core
+name: PiratesAddons
+main: xyz.dapirates.Core
 version: ${version}
-website: paulem.ovh
-author: Paulem
-prefix: BetterMending
+website: "https://www.dapirates.xyz/"
+author: KiratDewas
+prefix: PiratesAddons
 description: A small quality of life tweak to the Mending enchantment. Only supports PaperMC 1.21.7
 api-version: 1.21
-folia-supported: true
-
-permissions:
-  btm.use:
-    description: Allows to use the mending ability
-    default: true
