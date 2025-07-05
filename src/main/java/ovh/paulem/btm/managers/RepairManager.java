@@ -22,12 +22,8 @@ import java.util.stream.Collectors;
 public class RepairManager {
     private final TaskScheduler scheduler;
 
-    private final ParticleManager particleManager;
-
     public RepairManager(BetterMending plugin){
         this.scheduler = UniversalScheduler.getScheduler(plugin);
-
-        this.particleManager = new ParticleManager();
     }
 
     public void initAutoRepair(){
@@ -99,11 +95,7 @@ public class RepairManager {
                     (float) BetterMending.getConf().getDouble("soundVolume", 1),
                     (float) BetterMending.getConf().getDouble("soundPitch", 1));
         }
-
-        // Should play particle?
-        if(playParticle) {
-            particleManager.summonCircle(player, BetterMending.getConf().getInt("range", 3));
-        }
+        // Particle effect removed
     }
 
     public boolean canRepairItem(Player player, ItemStack item){
