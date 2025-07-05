@@ -1,7 +1,6 @@
 package ovh.paulem.btm.versioned.damage;
 
 import org.bukkit.inventory.ItemStack;
-import ovh.paulem.btm.utils.MathUtils;
 
 public interface DamageHandler {
     boolean hasDamage(ItemStack item);
@@ -16,10 +15,12 @@ public interface DamageHandler {
     boolean isDamageable(ItemStack item);
 
     static int getDamageCalculation(int itemDamages, int expValue, double ratio) {
-        return DamageHandler.getDamageCalculation(itemDamages, expValue, 1, ratio);
+        return getDamageCalculation(itemDamages, expValue, 1, ratio);
     }
 
     static int getDamageCalculation(int itemDamages, int expValue, int xpDivisor, double ratio) {
-        return itemDamages - MathUtils.constrainToRange((int) ((double) expValue / xpDivisor * ratio), 0, itemDamages);
+        int value = (int) ((double) expValue / xpDivisor * ratio);
+        int constrained = Math.min(Math.max(value, 0), itemDamages);
+        return itemDamages - constrained;
     }
 }
