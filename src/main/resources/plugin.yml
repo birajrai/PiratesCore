@@ -1,5 +1,5 @@
 name: BetterMending
-main: ovh.paulem.btm.BetterMending
+main: ovh.paulem.btm.Core
 version: ${version}
 website: paulem.ovh
 author: Paulem

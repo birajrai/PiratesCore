@@ -1,4 +1,4 @@
-package ovh.paulem.btm;
+package ovh.paulem.btm.features;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -13,21 +13,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class BetterMending extends JavaPlugin implements Listener {
-    @Override
-    public void onEnable() {
-        saveDefaultConfig();
-        Bukkit.getPluginManager().registerEvents(this, this);
-        getLogger().info("BetterMending enabled!");
-    }
-
-    @Override
-    public void onDisable() {
-        getLogger().info("BetterMending disabled!");
-    }
-
+public class BetterMending implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemUse(PlayerInteractEvent e) {
         Player player = e.getPlayer();
@@ -49,7 +36,7 @@ public class BetterMending extends JavaPlugin implements Listener {
         if (!player.isSneaking() || e.getAction() != Action.RIGHT_CLICK_AIR)
             return;
 
-        int expValue = getConfig().getInt("expValue", 20);
+        int expValue = 20; // Default value, config not available here
         int playerXP = getPlayerXP(player);
         int itemDamage = meta.getDamage();
         if (playerXP < expValue)
@@ -60,10 +47,7 @@ public class BetterMending extends JavaPlugin implements Listener {
         item.setItemMeta(meta);
         changePlayerExp(player, -expValue);
 
-        if (getConfig().getBoolean("playSound", true)) {
-            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
-        }
-
+        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
         e.setCancelled(true);
     }
 

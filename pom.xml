@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ovh.paulem.btm</groupId>
@@ -29,19 +29,6 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -56,22 +43,6 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>jeff-media-public</id>
-            <url>https://repo.jeff-media.com/public/</url>
-        </repository>
-        <repository>
-            <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/releases/</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -80,48 +51,6 @@
             <artifactId>paper-api</artifactId>
             <version>1.21.7-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.11.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.3.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-api</artifactId>
-            <version>4.3.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-serializer-bungeecord</artifactId>
-            <version>4.3.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-nbt</artifactId>
-            <version>4.13.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.Anon8281</groupId>
-            <artifactId>UniversalScheduler</artifactId>
-            <version>0.1.7</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.objecthunter</groupId>
-            <artifactId>exp4j</artifactId>
-            <version>0.4.8</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

@@ -1,7 +1,0 @@
-# -------- BETTER MENDING CONFIG --------
-
-# The amount of experience consumed per repair
-expValue: 20
-
-# Should play a sound when an item is repaired
-playSound: true
