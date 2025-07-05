@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ovh.paulem.btm</groupId>
+    <artifactId>piratesaddons</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>piratesaddons</name>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>jeff-media-public</id>
+            <url>https://repo.jeff-media.com/public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/releases/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.7-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Remove SpigotUpdateChecker dependency -->
+        <!-- <dependency>
+            <groupId>com.jeff_media</groupId>
+            <artifactId>SpigotUpdateChecker</artifactId>
+            <version>3.0.4</version>
+            <scope>compile</scope>
+        </dependency> -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-base</artifactId>
+            <version>3.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>4.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-api</artifactId>
+            <version>4.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-bungeecord</artifactId>
+            <version>4.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-nbt</artifactId>
+            <version>4.13.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Anon8281</groupId>
+            <artifactId>UniversalScheduler</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- <dependency>
+            <groupId>me.gabytm.util</groupId>
+            <artifactId>actions-spigot</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-gson-legacy-impl</artifactId>
+            <version>4.13.1</version>
+            <scope>compile</scope>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-facet</artifactId>
+            <version>4.3.2</version>
+            <scope>compile</scope>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-viaversion</artifactId>
+            <version>4.3.2</version>
+            <scope>compile</scope>
+        </dependency> -->
+        
+        <!-- Use local ParticleNativeAPI.jar instead of Maven dependency -->
+        <dependency>
+            <groupId>com.github.fierioziy.particlenativeapi</groupId>
+            <artifactId>ParticleNativeAPI-core</artifactId>
+            <version>4.2.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/ParticleNativeAPI.jar</systemPath>
+        </dependency>
+        <!-- Remove Oraxen dependency if present -->
+        <!-- <dependency>
+            <groupId>io.th0rgal</groupId>
+            <artifactId>oraxen</artifactId>
+            <version>1.167.0</version>
+            <scope>provided</scope>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>dev.triumphteam</groupId>
+            <artifactId>triumph-gui</artifactId>
+            <version>3.1.5</version>
+            <scope>compile</scope>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>io.th0rgal</groupId>
+            <artifactId>protectionlib</artifactId>
+            <version>1.3.6</version>
+            <scope>compile</scope>
+        </dependency> -->
+        <dependency>
+            <groupId>net.objecthunter</groupId>
+            <artifactId>exp4j</artifactId>
+            <version>0.4.8</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>
