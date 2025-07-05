@@ -28,6 +28,13 @@ public class BetterMending extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        String version = Bukkit.getVersion();
+        if (!version.contains("1.21.7")) {
+            getLogger().severe("This plugin only supports PaperMC 1.21.7. Detected version: " + version);
+            setEnabled(false);
+            return;
+        }
+
         if(!Versioning.isPost9()) {
             getLogger().severe("You need to use a 1.9+ server! Mending isn't present in older versions!");
             setEnabled(false);
