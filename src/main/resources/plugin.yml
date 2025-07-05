@@ -8,26 +8,7 @@ description: A small quality of life tweak to the Mending enchantment. Only supp
 api-version: 1.21
 folia-supported: true
 
-softdepend:
-  - PlaceholderAPI
-  - Oraxen
-
-commands:
-  btm:
-    usage: /btm [toggle, reload, version]
-    description: Enable or disable the Mending skill
-    permission: btm.commands.btm
-    aliases:
-      - betterthanmending
-      - bettermending
-
 permissions:
-  btm.commands.btm:
-    description: Controls the command /btm used to enable or disable the Mending skill
-    default: true
-  btm.commands.reload:
-    description: Controls the command /btm reload
-    default: op
   btm.use:
     description: Allows to use the mending ability
     default: true
