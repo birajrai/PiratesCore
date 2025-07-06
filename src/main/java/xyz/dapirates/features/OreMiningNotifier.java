@@ -235,6 +235,42 @@ public class OreMiningNotifier implements Listener {
         }
     }
 
+    private String getPrettyOreName(org.bukkit.Material material) {
+        switch (material) {
+            case DIAMOND_ORE:
+            case DEEPSLATE_DIAMOND_ORE:
+                return "§bDiamond Ore";
+            case EMERALD_ORE:
+            case DEEPSLATE_EMERALD_ORE:
+                return "§aEmerald Ore";
+            case GOLD_ORE:
+            case DEEPSLATE_GOLD_ORE:
+            case NETHER_GOLD_ORE:
+                return "§6Gold Ore";
+            case IRON_ORE:
+            case DEEPSLATE_IRON_ORE:
+                return "§7Iron Ore";
+            case COPPER_ORE:
+            case DEEPSLATE_COPPER_ORE:
+                return "§cCopper Ore";
+            case COAL_ORE:
+            case DEEPSLATE_COAL_ORE:
+                return "§8Coal Ore";
+            case REDSTONE_ORE:
+            case DEEPSLATE_REDSTONE_ORE:
+                return "§4Redstone Ore";
+            case LAPIS_ORE:
+            case DEEPSLATE_LAPIS_ORE:
+                return "§9Lapis Ore";
+            case ANCIENT_DEBRIS:
+                return "§5Ancient Debris";
+            case NETHER_QUARTZ_ORE:
+                return "§fNether Quartz Ore";
+            default:
+                return "§f" + material.name().replace("_", " ").toLowerCase();
+        }
+    }
+
     private void checkTimeBasedAlerts(Player player, OreMiningStats stats, long currentTime) {
         int blocksInTimeframe = stats.getBlocksInTimeframe(currentTime, config.getTimeBasedAlertTimeframe());
         int threshold = config.getTimeBasedAlertThreshold();
@@ -251,8 +287,8 @@ public class OreMiningNotifier implements Listener {
             }
             StringBuilder breakdown = new StringBuilder();
             for (var e : oreCounts.entrySet()) {
-                if (breakdown.length() > 0) breakdown.append(", ");
-                breakdown.append(e.getKey().name().toLowerCase()).append(": ").append(e.getValue());
+                if (breakdown.length() > 0) breakdown.append("§7, ");
+                breakdown.append(getPrettyOreName(e.getKey())).append(": §e").append(e.getValue());
             }
             String alertMessage = "§c[OreMining] §f" + player.getName() + " has mined in the last " + (config.getTimeBasedAlertTimeframe() / 60000) + " minutes: " + breakdown;
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
