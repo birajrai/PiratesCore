@@ -17,6 +17,7 @@ import xyz.dapirates.data.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.managers.DatabaseManager;
 import xyz.dapirates.managers.MessageManager;
+import xyz.dapirates.managers.WebhookManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,8 +29,9 @@ public class OreMiningNotifier implements Listener {
     private final OreMiningConfig config;
     private final DatabaseManager databaseManager;
     private final MessageManager messageManager;
+    private final WebhookManager webhookManager;
     private final Map<UUID, MiningSession> miningSessions;
-    private final Set<UUID> whitelistedPlayers;
+    private final Set<UUID> ignoredPlayers;
     private final Set<UUID> toggledOffPlayers;
 
     public OreMiningNotifier(Core plugin) {
@@ -37,10 +39,11 @@ public class OreMiningNotifier implements Listener {
         this.config = new OreMiningConfig(plugin);
         this.databaseManager = plugin.getDatabaseManager();
         this.messageManager = plugin.getMessageManager();
+        this.webhookManager = plugin.getWebhookManager();
         this.miningSessions = new ConcurrentHashMap<>();
-        this.whitelistedPlayers = new HashSet<>();
+        this.ignoredPlayers = new HashSet<>();
         this.toggledOffPlayers = new HashSet<>();
-        loadWhitelistedPlayers();
+        loadIgnoredPlayers();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -56,6 +59,11 @@ public class OreMiningNotifier implements Listener {
 
         // Check if player has toggled off notifications
         if (toggledOffPlayers.contains(player.getUniqueId())) {
+            return;
+        }
+
+        // Check if player is blacklisted (don't monitor their mining)
+        if (ignoredPlayers.contains(player.getUniqueId())) {
             return;
         }
 
@@ -95,7 +103,10 @@ public class OreMiningNotifier implements Listener {
 
             // Find the nearest player for TNT mining attribution
             Player nearestPlayer = findNearestPlayer(block.getLocation());
-            if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify")) {
+            if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify") 
+                    && !ignoredPlayers.contains(nearestPlayer.getUniqueId())) {
+                // Send TNT mining webhook notification
+                webhookManager.sendIndividualBlockNotification(nearestPlayer, material, block.getLocation(), true);
                 handleDelayedNotification(nearestPlayer, material, block.getLocation());
             }
         }
@@ -137,11 +148,6 @@ public class OreMiningNotifier implements Listener {
         List<Player> playersToNotify = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.hasPermission("pc.ores.notify") && !toggledOffPlayers.contains(player.getUniqueId())) {
-                // Check whitelist if enabled
-                if (config.isWhitelistEnabled() && !whitelistedPlayers.contains(player.getUniqueId())) {
-                    continue;
-                }
-
                 // Don't send to self if self-notifications are disabled
                 if (player.equals(miner) && !config.isSelfNotificationsEnabled()) {
                     continue;
@@ -244,6 +250,9 @@ public class OreMiningNotifier implements Listener {
         MiningSession session = miningSessions.computeIfAbsent(playerId, k -> new MiningSession(player));
         session.addBlock(material);
 
+        // Send individual block webhook notification
+        webhookManager.sendIndividualBlockNotification(player, material, location, false);
+
         // Schedule delayed notification if not already scheduled
         if (!session.isNotificationScheduled()) {
             session.setNotificationScheduled(true);
@@ -265,6 +274,9 @@ public class OreMiningNotifier implements Listener {
         int totalBlocks = session.getTotalBlocks();
         long sessionDuration = session.getSessionDuration();
 
+        // Send batched session webhook notification
+        webhookManager.sendBatchedSessionNotification(player, minedBlocks, totalBlocks, sessionDuration);
+
         // Create batched message
         String message = createBatchedMessage(player, minedBlocks, totalBlocks, sessionDuration);
 
@@ -278,11 +290,6 @@ public class OreMiningNotifier implements Listener {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (onlinePlayer.hasPermission("pc.ores.notify")
                     && !toggledOffPlayers.contains(onlinePlayer.getUniqueId())) {
-                // Check whitelist if enabled
-                if (config.isWhitelistEnabled() && !whitelistedPlayers.contains(onlinePlayer.getUniqueId())) {
-                    continue;
-                }
-
                 // Don't send to self if self-notifications are disabled
                 if (onlinePlayer.equals(player) && !config.isSelfNotificationsEnabled()) {
                     continue;
@@ -359,17 +366,15 @@ public class OreMiningNotifier implements Listener {
 
     private void sendWelcomeMessage(Player player) {
         player.sendMessage("§a[OreMining] §fWelcome! You have ore mining notifications enabled.");
-        player.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear");
+        player.sendMessage("§7Available commands: toggle, reload, stats, top, ignore");
     }
 
-    private void loadWhitelistedPlayers() {
-        List<String> whitelistedNames = config.getWhitelistedPlayers();
-        for (String name : whitelistedNames) {
-            // Try to get UUID from name (this is a simplified approach)
-            // In a real implementation, you might want to use a UUID cache or database
+    private void loadIgnoredPlayers() {
+        List<String> ignoredNames = config.getIgnoredPlayers();
+        for (String name : ignoredNames) {
             Player player = Bukkit.getPlayer(name);
             if (player != null) {
-                whitelistedPlayers.add(player.getUniqueId());
+                ignoredPlayers.add(player.getUniqueId());
             }
         }
     }
@@ -386,20 +391,20 @@ public class OreMiningNotifier implements Listener {
         }
     }
 
-    public void addToWhitelist(Player player) {
-        whitelistedPlayers.add(player.getUniqueId());
-        config.addWhitelistedPlayer(player.getName());
-        player.sendMessage("§a[OreMining] §fAdded to whitelist.");
+    public void addToIgnore(Player player) {
+        ignoredPlayers.add(player.getUniqueId());
+        config.addIgnoredPlayer(player.getName());
+        player.sendMessage("§a[OreMining] §fAdded to ignore list.");
     }
 
-    public void removeFromWhitelist(Player player) {
-        whitelistedPlayers.remove(player.getUniqueId());
-        config.removeWhitelistedPlayer(player.getName());
-        player.sendMessage("§a[OreMining] §fRemoved from whitelist.");
+    public void removeFromIgnore(Player player) {
+        ignoredPlayers.remove(player.getUniqueId());
+        config.removeIgnoredPlayer(player.getName());
+        player.sendMessage("§a[OreMining] §fRemoved from ignore list.");
     }
 
-    public boolean isPlayerWhitelisted(UUID playerId) {
-        return whitelistedPlayers.contains(playerId);
+    public boolean isPlayerIgnored(UUID playerId) {
+        return ignoredPlayers.contains(playerId);
     }
 
     public boolean isPlayerToggledOff(UUID playerId) {
