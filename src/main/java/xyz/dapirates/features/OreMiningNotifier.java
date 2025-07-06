@@ -30,7 +30,6 @@ public class OreMiningNotifier implements Listener {
 
     private final Core plugin;
     private final OreMiningConfig config;
-    private final OreMiningLogger logger;
     private final DatabaseManager databaseManager;
     private final MessageManager messageManager;
     private final Map<UUID, OreMiningStats> playerStats;
@@ -43,7 +42,6 @@ public class OreMiningNotifier implements Listener {
     public OreMiningNotifier(Core plugin) {
         this.plugin = plugin;
         this.config = new OreMiningConfig(plugin);
-        this.logger = new OreMiningLogger(plugin);
         this.databaseManager = plugin.getDatabaseManager();
         this.messageManager = plugin.getMessageManager();
         this.playerStats = new ConcurrentHashMap<>();
@@ -100,9 +98,6 @@ public class OreMiningNotifier implements Listener {
 
         // Execute custom commands
         executeCustomCommands(player, material, block.getLocation());
-
-        // Log the mining activity
-        logger.logMiningActivity(player, material, block.getLocation());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -123,7 +118,6 @@ public class OreMiningNotifier implements Listener {
             if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify")) {
                 updatePlayerStats(nearestPlayer, material, block.getLocation());
                 sendOreMiningNotification(nearestPlayer, material, block.getLocation(), true);
-                logger.logMiningActivity(nearestPlayer, material, block.getLocation(), true);
             }
         }
     }
