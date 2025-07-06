@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>xyz.dapirates</groupId>
   <artifactId>piratescore</artifactId>
-  <name>piratescore</name>
+  <name>PiratesCore</name>
   <version>1.0</version>
   <description>A small quality of life tweak to the Mending enchantment. Only supports PaperMC 1.21.7</description>
   <build>
