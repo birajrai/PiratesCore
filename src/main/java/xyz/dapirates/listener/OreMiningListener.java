@@ -115,9 +115,10 @@ public class OreMiningListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         // No stats to initialize
         Player player = event.getPlayer();
-        if (player.hasPermission("pc.ores.notify")) {
-            sendWelcomeMessage(player);
-        }
+        // Removed welcome message
+        // if (player.hasPermission("pc.ores.notify")) {
+        // sendWelcomeMessage(player);
+        // }
     }
 
     @EventHandler
@@ -362,11 +363,6 @@ public class OreMiningListener implements Listener {
         }
 
         return message;
-    }
-
-    private void sendWelcomeMessage(Player player) {
-        player.sendMessage("§a[OreMining] §fWelcome! You have ore mining notifications enabled.");
-        player.sendMessage("§7Available commands: toggle, reload, stats, top, ignore");
     }
 
     private void loadIgnoredPlayers() {
