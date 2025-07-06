@@ -100,7 +100,6 @@ blocks:
 ## Commands
 
 ### Player Commands
-- `/oremining help` - Show help message
 - `/oremining toggle` - Toggle notifications for yourself
 - `/oremining stats` - Show your mining statistics
 - `/oremining top [amount]` - Show top miners
@@ -109,9 +108,6 @@ blocks:
 - `/oremining reload` - Reload configuration
 - `/oremining stats [player]` - Show player statistics
 - `/oremining whitelist add/remove <player>` - Manage whitelist
-- `/oremining blocks` - List tracked blocks
-- `/oremining addblock <block> [message] [sound]` - Add tracked block
-- `/oremining removeblock <block>` - Remove tracked block
 - `/oremining clear [player]` - Clear statistics
 - `/oremining logs [clear]` - View or clear logs
 
