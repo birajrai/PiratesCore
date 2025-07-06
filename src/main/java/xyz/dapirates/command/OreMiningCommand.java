@@ -31,16 +31,13 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sendHelp(sender);
+            sender.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear, logs");
             return true;
         }
         
         String subCommand = args[0].toLowerCase();
         
         switch (subCommand) {
-            case "help":
-                sendHelp(sender);
-                break;
             case "toggle":
                 if (!(sender instanceof Player)) {
                     sender.sendMessage("§cThis command can only be used by players!");
@@ -73,29 +70,12 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 }
                 handleWhitelistCommand(sender, args);
                 break;
-            case "blocks":
-                handleBlocksCommand(sender, args);
-                break;
             case "clear":
                 if (!sender.hasPermission("pc.ores.notify.admin")) {
                     sender.sendMessage("§cYou don't have permission to use this command!");
                     return true;
                 }
                 handleClearCommand(sender, args);
-                break;
-            case "addblock":
-                if (!sender.hasPermission("pc.ores.notify.admin")) {
-                    sender.sendMessage("§cYou don't have permission to use this command!");
-                    return true;
-                }
-                handleAddBlockCommand(sender, args);
-                break;
-            case "removeblock":
-                if (!sender.hasPermission("pc.ores.notify.admin")) {
-                    sender.sendMessage("§cYou don't have permission to use this command!");
-                    return true;
-                }
-                handleRemoveBlockCommand(sender, args);
                 break;
             case "logs":
                 if (!sender.hasPermission("pc.ores.notify.admin")) {
@@ -106,33 +86,14 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 break;
             default:
                 sender.sendMessage("§cUnknown subcommand: " + subCommand);
-                sendHelp(sender);
+                sender.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear, logs");
                 break;
         }
         
         return true;
     }
     
-    private void sendHelp(CommandSender sender) {
-        sender.sendMessage("§a=== OreMining Commands ===");
-        sender.sendMessage("§f/oremining help §7- Show this help message");
-        sender.sendMessage("§f/oremining toggle §7- Toggle notifications for yourself");
-        
-        if (sender.hasPermission("pc.ores.notify.admin")) {
-            sender.sendMessage("§f/oremining reload §7- Reload configuration");
-            sender.sendMessage("§f/oremining stats [player] §7- Show mining statistics");
-            sender.sendMessage("§f/oremining top [amount] §7- Show top miners");
-            sender.sendMessage("§f/oremining whitelist add/remove <player> §7- Manage whitelist");
-            sender.sendMessage("§f/oremining blocks §7- List tracked blocks");
-            sender.sendMessage("§f/oremining addblock <block> [message] [sound] §7- Add tracked block");
-            sender.sendMessage("§f/oremining removeblock <block> §7- Remove tracked block");
-            sender.sendMessage("§f/oremining clear [player] §7- Clear statistics");
-            sender.sendMessage("§f/oremining logs [clear] §7- View or clear logs");
-        } else {
-            sender.sendMessage("§f/oremining stats §7- Show your mining statistics");
-            sender.sendMessage("§f/oremining top [amount] §7- Show top miners");
-        }
-    }
+
     
     private void handleStatsCommand(CommandSender sender, String[] args) {
         if (args.length > 1 && sender.hasPermission("pc.ores.notify.admin")) {
@@ -240,22 +201,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
         }
     }
     
-    private void handleBlocksCommand(CommandSender sender, String[] args) {
-        Set<Material> trackedBlocks = config.getTrackedBlocks();
-        
-        sender.sendMessage("§a=== Tracked Blocks ===");
-        if (trackedBlocks.isEmpty()) {
-            sender.sendMessage("§7No blocks are currently being tracked.");
-            return;
-        }
-        
-        trackedBlocks.stream()
-            .sorted(Comparator.comparing(Material::name))
-            .forEach(material -> {
-                String blockName = material.name().replace("_", " ");
-                sender.sendMessage("§7- §f" + blockName);
-            });
-    }
+
     
     private void handleClearCommand(CommandSender sender, String[] args) {
         if (args.length > 1) {
@@ -275,38 +221,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
         }
     }
     
-    private void handleAddBlockCommand(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("§cUsage: /oremining addblock <block> [message] [sound]");
-            return;
-        }
-        
-        try {
-            Material material = Material.valueOf(args[1].toUpperCase());
-            String message = args.length > 2 ? args[2] : "§a[OreMining] §f{player} found {block}!";
-            Sound sound = args.length > 3 ? Sound.valueOf(args[3].toUpperCase()) : Sound.BLOCK_NOTE_BLOCK_PLING;
-            
-            config.addTrackedBlock(material, message, sound, true);
-            sender.sendMessage("§a[OreMining] §fAdded " + material.name() + " to tracked blocks.");
-        } catch (IllegalArgumentException e) {
-            sender.sendMessage("§cInvalid block or sound: " + args[1]);
-        }
-    }
-    
-    private void handleRemoveBlockCommand(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("§cUsage: /oremining removeblock <block>");
-            return;
-        }
-        
-        try {
-            Material material = Material.valueOf(args[1].toUpperCase());
-            config.removeTrackedBlock(material);
-            sender.sendMessage("§a[OreMining] §fRemoved " + material.name() + " from tracked blocks.");
-        } catch (IllegalArgumentException e) {
-            sender.sendMessage("§cInvalid block: " + args[1]);
-        }
-    }
+
     
     private void handleLogsCommand(CommandSender sender, String[] args) {
         if (args.length > 1 && args[1].equalsIgnoreCase("clear")) {
@@ -324,9 +239,9 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
         
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("help", "toggle", "stats", "top");
+            List<String> subCommands = Arrays.asList("toggle", "stats", "top");
             if (sender.hasPermission("pc.ores.notify.admin")) {
-                subCommands = Arrays.asList("help", "toggle", "reload", "stats", "top", "whitelist", "blocks", "clear", "addblock", "removeblock", "logs");
+                subCommands = Arrays.asList("toggle", "reload", "stats", "top", "whitelist", "clear", "logs");
             }
             
             String input = args[0].toLowerCase();
@@ -353,16 +268,6 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 case "whitelist":
                     if (sender.hasPermission("pc.ores.notify.admin")) {
                         completions.addAll(Arrays.asList("add", "remove"));
-                    }
-                    break;
-                case "removeblock":
-                    if (sender.hasPermission("pc.ores.notify.admin")) {
-                        String input = args[1].toLowerCase();
-                        for (Material material : config.getTrackedBlocks()) {
-                            if (material.name().toLowerCase().startsWith(input)) {
-                                completions.add(material.name());
-                            }
-                        }
                     }
                     break;
                 case "logs":
