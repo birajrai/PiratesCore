@@ -18,6 +18,9 @@ commands:
     description: Manage ore mining notifications and statistics
     usage: /oremining help
     aliases: [om, ores]
+  pirates:
+    description: Reload all PiratesAddons configs
+    usage: /pirates reload
 
 permissions:
   pc.ores.notify:
