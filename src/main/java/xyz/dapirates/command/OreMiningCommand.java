@@ -35,7 +35,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear, logs");
+            sender.sendMessage("§7Available commands: toggle, reload, stats, top, clear");
             return true;
         }
         
@@ -67,13 +67,6 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             case "top":
                 handleTopCommand(sender, args);
                 break;
-            case "whitelist":
-                if (!sender.hasPermission("pc.ores.notify.admin")) {
-                    sender.sendMessage("§cYou don't have permission to use this command!");
-                    return true;
-                }
-                handleWhitelistCommand(sender, args);
-                break;
             case "clear":
                 if (!sender.hasPermission("pc.ores.notify.admin")) {
                     sender.sendMessage("§cYou don't have permission to use this command!");
@@ -81,16 +74,9 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 }
                 handleClearCommand(sender, args);
                 break;
-            case "logs":
-                if (!sender.hasPermission("pc.ores.notify.admin")) {
-                    sender.sendMessage("§cYou don't have permission to use this command!");
-                    return true;
-                }
-                handleLogsCommand(sender, args);
-                break;
             default:
                 sender.sendMessage("§cUnknown subcommand: " + subCommand);
-                sender.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear, logs");
+                sender.sendMessage("§7Available commands: toggle, reload, stats, top, clear");
                 break;
         }
         
@@ -279,7 +265,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> subCommands = Arrays.asList("toggle", "stats", "top");
             if (sender.hasPermission("pc.ores.notify.admin")) {
-                subCommands = Arrays.asList("toggle", "reload", "stats", "top", "whitelist", "clear", "logs");
+                subCommands = Arrays.asList("toggle", "reload", "stats", "top", "clear");
             }
             
             String input = args[0].toLowerCase();
@@ -303,30 +289,6 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     break;
-                case "whitelist":
-                    if (sender.hasPermission("pc.ores.notify.admin")) {
-                        completions.addAll(Arrays.asList("add", "remove"));
-                    }
-                    break;
-                case "logs":
-                    if (sender.hasPermission("pc.ores.notify.admin")) {
-                        completions.add("clear");
-                    }
-                    break;
-            }
-        } else if (args.length == 3) {
-            String subCommand = args[0].toLowerCase();
-            
-            if (subCommand.equals("whitelist") && sender.hasPermission("pc.ores.notify.admin")) {
-                String action = args[1].toLowerCase();
-                if (action.equals("add") || action.equals("remove")) {
-                    String input = args[2].toLowerCase();
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (player.getName().toLowerCase().startsWith(input)) {
-                            completions.add(player.getName());
-                        }
-                    }
-                }
             }
         }
         
