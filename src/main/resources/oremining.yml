@@ -11,8 +11,8 @@ general:
   # Allow players to receive notifications about their own mining
   self-notifications: true
   
-  # Enable whitelist system (only whitelisted players receive notifications)
-  whitelist-enabled: false
+  # Enable ignore system (ignored players won't be monitored)
+  ignore-enabled: false
   
   # Enable TNT mining detection
   tnt-mining-enabled: true
@@ -55,11 +55,9 @@ alerts:
     # Alert message format
     message: "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!"
 
-# Player whitelist (only used if whitelist-enabled is true)
-whitelist:
-  players:
-    - "admin1"
-    - "admin2"
+# Player ignore list (ignored players won't be monitored for ore mining)
+ignore:
+  players: []
 
 # Block-specific configurations
 blocks:
