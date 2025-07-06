@@ -6,8 +6,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import xyz.dapirates.Core;
-import xyz.dapirates.data.OreMiningData;
+import xyz.dapirates.core.Core;
+import xyz.dapirates.service.OreMiningData;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class OreMiningConfig {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.addDefault(path + ".enabled", true);
         config.addDefault(path + ".message", message);
-        config.addDefault(path + ".sound", sound.key().asString());
+        config.addDefault(path + ".sound", sound.toString());
         config.addDefault(path + ".show-coordinates", true);
         config.addDefault(path + ".commands", Arrays.asList());
     }
@@ -265,10 +265,9 @@ public class OreMiningConfig {
 
     public Sound getCustomSound(Material material) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
-        String soundName = config.getString(path + ".sound", "block.note_block.pling");
-
+        String soundName = config.getString(path + ".sound", Sound.BLOCK_NOTE_BLOCK_PLING.toString());
         try {
-            return Sound.valueOf(soundName.toUpperCase().replace(".", "_"));
+            return Sound.valueOf(soundName);
         } catch (IllegalArgumentException e) {
             return Sound.BLOCK_NOTE_BLOCK_PLING;
         }
@@ -289,7 +288,7 @@ public class OreMiningConfig {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.set(path + ".enabled", true);
         config.set(path + ".message", message);
-        config.set(path + ".sound", sound.key().asString());
+        config.set(path + ".sound", sound.toString());
         config.set(path + ".show-coordinates", showCoords);
         config.set(path + ".commands", Arrays.asList());
         saveConfig();

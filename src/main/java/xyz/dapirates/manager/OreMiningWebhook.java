@@ -1,12 +1,13 @@
-package xyz.dapirates.managers;
+package xyz.dapirates.manager;
 
-import xyz.dapirates.Core;
+import xyz.dapirates.core.Core;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import xyz.dapirates.service.MiningSession;
 
 public class OreMiningWebhook {
     private final Core plugin;

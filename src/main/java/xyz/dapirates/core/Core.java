@@ -1,19 +1,19 @@
-package xyz.dapirates;
+package xyz.dapirates.core;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.dapirates.features.OreMiningNotifier;
-import xyz.dapirates.managers.CommandManager;
-import xyz.dapirates.managers.FeatureManager;
-import xyz.dapirates.managers.DatabaseManager;
-import xyz.dapirates.managers.MessageManager;
-import xyz.dapirates.managers.WebhookManager;
-import xyz.dapirates.managers.OreMiningWebhook;
-import xyz.dapirates.managers.ConfigManager;
+import xyz.dapirates.listener.OreMiningListener;
+import xyz.dapirates.manager.CommandManager;
+import xyz.dapirates.manager.FeatureManager;
+import xyz.dapirates.manager.DatabaseManager;
+import xyz.dapirates.manager.MessageManager;
+import xyz.dapirates.manager.WebhookManager;
+import xyz.dapirates.manager.OreMiningWebhook;
+import xyz.dapirates.manager.ConfigManager;
 import xyz.dapirates.utils.OreMiningConfig;
 
 public class Core extends JavaPlugin {
 
-    private OreMiningNotifier oreMiningNotifier;
+    private OreMiningListener oreMiningListener;
     private OreMiningConfig oreMiningConfig;
     private CommandManager commandManager;
     private FeatureManager featureManager;
@@ -32,7 +32,7 @@ public class Core extends JavaPlugin {
         featureManager.registerFeatures();
 
         // Register commands
-        commandManager.registerCommands(oreMiningNotifier);
+        commandManager.registerCommands(oreMiningListener);
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
@@ -40,9 +40,9 @@ public class Core extends JavaPlugin {
     @Override
     public void onDisable() {
         // Flush all mining sessions to the database before shutdown
-        if (oreMiningNotifier != null && databaseManager != null && databaseManager.isDatabaseAvailable()) {
+        if (oreMiningListener != null && databaseManager != null && databaseManager.isDatabaseAvailable()) {
             // Flush all active mining sessions to database asynchronously
-            oreMiningNotifier.flushAllMiningSessionsToStats();
+            oreMiningListener.flushAllMiningSessionsToStats();
 
             // Give a small delay to allow async operations to complete
             try {
@@ -72,11 +72,11 @@ public class Core extends JavaPlugin {
         configManager = new ConfigManager(this, oreMiningConfig, webhookManager);
 
         // Initialize ore mining feature after managers
-        oreMiningNotifier = new OreMiningNotifier(this);
+        oreMiningListener = new OreMiningListener(this);
     }
 
-    public OreMiningNotifier getOreMiningNotifier() {
-        return oreMiningNotifier;
+    public OreMiningListener getOreMiningListener() {
+        return oreMiningListener;
     }
 
     public OreMiningConfig getOreMiningConfig() {

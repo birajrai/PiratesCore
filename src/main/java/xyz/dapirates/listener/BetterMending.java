@@ -1,4 +1,4 @@
-package xyz.dapirates.features;
+package xyz.dapirates.listener;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -118,4 +118,4 @@ public class BetterMending implements Listener {
         else
             return (int) (4.5 * level * level - 162.5 * level + 2220);
     }
-}
+} 

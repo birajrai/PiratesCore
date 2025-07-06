@@ -1,8 +1,8 @@
-package xyz.dapirates.managers;
+package xyz.dapirates.manager;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.dapirates.features.BetterMending;
-import xyz.dapirates.features.OreMiningNotifier;
+import xyz.dapirates.listener.BetterMending;
+import xyz.dapirates.listener.OreMiningListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -22,8 +22,8 @@ public class FeatureManager {
         registerFeature("bettermending", BetterMending::new);
 
         // Register ore mining feature (already initialized in Core)
-        OreMiningNotifier oreMiningNotifier = ((xyz.dapirates.Core) plugin).getOreMiningNotifier();
-        registerFeature("oremining", oreMiningNotifier);
+        OreMiningListener oreMiningListener = ((xyz.dapirates.core.Core) plugin).getOreMiningListener();
+        registerFeature("oremining", oreMiningListener);
     }
 
     private void registerFeature(String name, Object feature) {
@@ -44,8 +44,8 @@ public class FeatureManager {
         return null;
     }
 
-    public OreMiningNotifier getOreMiningNotifier() {
-        return getFeature("oremining", OreMiningNotifier.class);
+    public OreMiningListener getOreMiningListener() {
+        return getFeature("oremining", OreMiningListener.class);
     }
 
     public BetterMending getBetterMending() {

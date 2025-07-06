@@ -3,7 +3,7 @@ package xyz.dapirates.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import xyz.dapirates.Core;
+import xyz.dapirates.core.Core;
 
 public class PiratesCommand implements CommandExecutor {
     private final Core plugin;

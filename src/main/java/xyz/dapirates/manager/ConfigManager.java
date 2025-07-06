@@ -1,6 +1,6 @@
-package xyz.dapirates.managers;
+package xyz.dapirates.manager;
 
-import xyz.dapirates.Core;
+import xyz.dapirates.core.Core;
 import xyz.dapirates.utils.OreMiningConfig;
 
 public class ConfigManager {

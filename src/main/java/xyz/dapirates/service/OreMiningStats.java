@@ -1,4 +1,4 @@
-package xyz.dapirates.data;
+package xyz.dapirates.service;
 
 import org.bukkit.Material;
 

@@ -7,9 +7,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import xyz.dapirates.Core;
-import xyz.dapirates.data.OreMiningStats;
-import xyz.dapirates.features.OreMiningNotifier;
+import xyz.dapirates.core.Core;
+import xyz.dapirates.service.OreMiningStats;
+import xyz.dapirates.listener.OreMiningListener;
 import xyz.dapirates.utils.OreMiningConfig;
 
 import java.util.*;
@@ -17,10 +17,10 @@ import java.util.*;
 public class OreMiningCommand implements CommandExecutor, TabCompleter {
 
     private final Core plugin;
-    private final OreMiningNotifier notifier;
+    private final OreMiningListener notifier;
     private final OreMiningConfig config;
 
-    public OreMiningCommand(Core plugin, OreMiningNotifier notifier) {
+    public OreMiningCommand(Core plugin, OreMiningListener notifier) {
         this.plugin = plugin;
         this.notifier = notifier;
         this.config = new OreMiningConfig(plugin);

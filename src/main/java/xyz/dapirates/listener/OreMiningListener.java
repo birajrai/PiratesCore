@@ -1,4 +1,4 @@
-package xyz.dapirates.features;
+package xyz.dapirates.listener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,18 +12,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import xyz.dapirates.Core;
-import xyz.dapirates.data.MiningSession;
+import xyz.dapirates.core.Core;
+import xyz.dapirates.service.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
-import xyz.dapirates.managers.DatabaseManager;
-import xyz.dapirates.managers.MessageManager;
-import xyz.dapirates.managers.OreMiningWebhook;
+import xyz.dapirates.manager.DatabaseManager;
+import xyz.dapirates.manager.MessageManager;
+import xyz.dapirates.manager.OreMiningWebhook;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
-public class OreMiningNotifier implements Listener {
+public class OreMiningListener implements Listener {
 
     private final Core plugin;
     private final OreMiningConfig config;
@@ -34,7 +34,7 @@ public class OreMiningNotifier implements Listener {
     private final Set<UUID> ignoredPlayers;
     private final Set<UUID> toggledOffPlayers;
 
-    public OreMiningNotifier(Core plugin) {
+    public OreMiningListener(Core plugin) {
         this.plugin = plugin;
         this.config = new OreMiningConfig(plugin);
         this.databaseManager = plugin.getDatabaseManager();

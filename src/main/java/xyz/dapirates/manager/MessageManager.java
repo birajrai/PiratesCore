@@ -1,4 +1,4 @@
-package xyz.dapirates.managers;
+package xyz.dapirates.manager;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -8,7 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import xyz.dapirates.Core;
+import xyz.dapirates.core.Core;
 
 import java.util.List;
 import java.util.Map;

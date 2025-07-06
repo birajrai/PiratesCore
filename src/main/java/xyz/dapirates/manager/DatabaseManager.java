@@ -1,8 +1,8 @@
-package xyz.dapirates.managers;
+package xyz.dapirates.manager;
 
 import org.bukkit.Material;
-import xyz.dapirates.Core;
-import xyz.dapirates.data.OreMiningStats;
+import xyz.dapirates.core.Core;
+import xyz.dapirates.service.OreMiningStats;
 
 import java.io.File;
 import java.sql.*;

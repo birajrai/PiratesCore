@@ -1,10 +1,10 @@
-name: PiratesAddons
-main: xyz.dapirates.Core
+name: ${name}
+main: xyz.dapirates.core.Core
 version: ${version}
 website: "https://www.dapirates.xyz/"
 author: KiratDewas
 prefix: PiratesAddons
-description: A small quality of life tweak to the Mending enchantment and ore mining notifications. Only supports PaperMC 1.21.7
+description: ${description}
 api-version: 1.21
 
 # Soft dependencies (optional)
