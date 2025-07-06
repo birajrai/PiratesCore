@@ -284,13 +284,14 @@ public class DatabaseManager {
         return topPlayers;
     }
 
-    private void addMiningEntry(Connection conn, UUID playerId, Material material, String world, int x, int y, int z,
-            boolean isTNT) throws SQLException {
+    private void addMiningEntry(Connection conn, UUID playerId, Material material, String world, int x, int y, int z, boolean isTNT) throws SQLException {
+        // Ensure player exists in player_stats
+        OreMiningStats dummyStats = new OreMiningStats(playerId);
+        savePlayerStats(conn, dummyStats);
         String insertHistory = """
-                INSERT INTO mining_history (player_uuid, material, world, x, y, z, is_tnt)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
-
+            INSERT INTO mining_history (player_uuid, material, world, x, y, z, is_tnt)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """;
         try (PreparedStatement pstmt = conn.prepareStatement(insertHistory)) {
             pstmt.setString(1, playerId.toString());
             pstmt.setString(2, material.name());
