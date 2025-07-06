@@ -47,14 +47,14 @@ public class Core extends JavaPlugin {
         // Initialize ore mining config
         oreMiningConfig = new OreMiningConfig(this);
         
-        // Initialize ore mining feature
-        oreMiningNotifier = new OreMiningNotifier(this);
-        
-        // Initialize managers
+        // Initialize managers first
         commandManager = new CommandManager(this);
         featureManager = new FeatureManager(this);
         databaseManager = new DatabaseManager(this);
         messageManager = new MessageManager(this);
+        
+        // Initialize ore mining feature after managers
+        oreMiningNotifier = new OreMiningNotifier(this);
     }
     
     public OreMiningNotifier getOreMiningNotifier() {

@@ -145,14 +145,16 @@ public class OreMiningNotifier implements Listener {
         long currentTime = System.currentTimeMillis();
         lastMiningTime.put(playerId, currentTime);
         
-        // Save to database asynchronously
-        databaseManager.savePlayerStatsAsync(stats).thenRun(() -> {
-            databaseManager.updateCache(playerId, stats);
-        });
-        
-        // Add mining entry to database asynchronously
-        databaseManager.addMiningEntryAsync(playerId, material, location.getWorld().getName(), 
-            location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
+        // Save to database asynchronously if available
+        if (databaseManager != null) {
+            databaseManager.savePlayerStatsAsync(stats).thenRun(() -> {
+                databaseManager.updateCache(playerId, stats);
+            });
+            
+            // Add mining entry to database asynchronously
+            databaseManager.addMiningEntryAsync(playerId, material, location.getWorld().getName(), 
+                location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
+        }
         
         // Check for time-based alerts
         checkTimeBasedAlerts(player, stats, currentTime);
@@ -299,7 +301,7 @@ public class OreMiningNotifier implements Listener {
     }
     
     public CompletableFuture<List<OreMiningStats>> getTopPlayersAsync(int limit) {
-        if (!databaseManager.isDatabaseAvailable()) {
+        if (databaseManager == null || !databaseManager.isDatabaseAvailable()) {
             // Fallback to in-memory stats
             return CompletableFuture.completedFuture(
                 playerStats.values().stream()
@@ -328,7 +330,7 @@ public class OreMiningNotifier implements Listener {
         }
         
         // Try database if available
-        if (databaseManager.isDatabaseAvailable()) {
+        if (databaseManager != null && databaseManager.isDatabaseAvailable()) {
             try {
                 stats = databaseManager.loadPlayerStatsAsync(playerId).get();
                 if (stats != null) {
@@ -351,13 +353,17 @@ public class OreMiningNotifier implements Listener {
     public void clearPlayerStats(UUID playerId) {
         playerStats.remove(playerId);
         lastMiningTime.remove(playerId);
-        databaseManager.clearPlayerStatsAsync(playerId);
+        if (databaseManager != null) {
+            databaseManager.clearPlayerStatsAsync(playerId);
+        }
     }
     
     public void clearAllStats() {
         playerStats.clear();
         lastMiningTime.clear();
-        databaseManager.clearAllStatsAsync();
+        if (databaseManager != null) {
+            databaseManager.clearAllStatsAsync();
+        }
     }
     
     public boolean isPlayerWhitelisted(UUID playerId) {

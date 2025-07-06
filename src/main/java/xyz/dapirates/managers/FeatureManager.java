@@ -21,8 +21,8 @@ public class FeatureManager {
         // Register existing features
         registerFeature("bettermending", new BetterMending());
         
-        // Register ore mining feature
-        OreMiningNotifier oreMiningNotifier = new OreMiningNotifier((xyz.dapirates.Core) plugin);
+        // Register ore mining feature (already initialized in Core)
+        OreMiningNotifier oreMiningNotifier = ((xyz.dapirates.Core) plugin).getOreMiningNotifier();
         registerFeature("oremining", oreMiningNotifier);
     }
     
