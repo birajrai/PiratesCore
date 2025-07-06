@@ -154,16 +154,16 @@ public class OreMiningConfig {
     public String getMessageFormat() {
         return config.getString("general.message-format", "text");
     }
-    
+
     // Delayed notification settings
     public boolean isDelayedNotificationsEnabled() {
         return config.getBoolean("general.delayed-notifications.enabled", true);
     }
-    
+
     public int getDelayedNotificationDelay() {
         return config.getInt("general.delayed-notifications.delay-seconds", 30);
     }
-    
+
     public boolean isBatchMessagesEnabled() {
         return config.getBoolean("general.delayed-notifications.batch-messages", true);
     }

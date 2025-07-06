@@ -103,10 +103,9 @@ public class OreMiningNotifier implements Listener {
 
             // Find the nearest player for TNT mining attribution
             Player nearestPlayer = findNearestPlayer(block.getLocation());
-            if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify") 
+            if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify")
                     && !ignoredPlayers.contains(nearestPlayer.getUniqueId())) {
-                // Send TNT mining webhook notification
-                oreMiningWebhook.sendIndividualBlockNotification(nearestPlayer, material, block.getLocation(), true);
+                // No longer send TNT mining webhook notification
                 handleDelayedNotification(nearestPlayer, material, block.getLocation());
             }
         }
@@ -250,8 +249,9 @@ public class OreMiningNotifier implements Listener {
         MiningSession session = miningSessions.computeIfAbsent(playerId, k -> new MiningSession(player));
         session.addBlock(material);
 
-        // Send individual block webhook notification
-        oreMiningWebhook.sendIndividualBlockNotification(player, material, location, false);
+        // No longer send individual block webhook notification
+        // oreMiningWebhook.sendIndividualBlockNotification(player, material, location,
+        // false);
 
         // Schedule delayed notification if not already scheduled
         if (!session.isNotificationScheduled()) {

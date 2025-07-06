@@ -52,7 +52,7 @@ public class Core extends JavaPlugin {
         if (oreMiningNotifier != null && databaseManager != null && databaseManager.isDatabaseAvailable()) {
             // Flush all active mining sessions to database asynchronously
             oreMiningNotifier.flushAllMiningSessionsToStats();
-            
+
             // Give a small delay to allow async operations to complete
             try {
                 Thread.sleep(1000);
@@ -60,7 +60,7 @@ public class Core extends JavaPlugin {
                 Thread.currentThread().interrupt();
             }
         }
-        
+
         if (databaseManager != null) {
             databaseManager.close();
         }
@@ -111,6 +111,5 @@ public class Core extends JavaPlugin {
     public ConfigManager getConfigManager() {
         return configManager;
     }
-
 
 }
