@@ -17,7 +17,7 @@ import xyz.dapirates.data.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.managers.DatabaseManager;
 import xyz.dapirates.managers.MessageManager;
-import xyz.dapirates.managers.WebhookManager;
+import xyz.dapirates.managers.OreMiningWebhook;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +29,7 @@ public class OreMiningNotifier implements Listener {
     private final OreMiningConfig config;
     private final DatabaseManager databaseManager;
     private final MessageManager messageManager;
-    private final WebhookManager webhookManager;
+    private final OreMiningWebhook oreMiningWebhook;
     private final Map<UUID, MiningSession> miningSessions;
     private final Set<UUID> ignoredPlayers;
     private final Set<UUID> toggledOffPlayers;
@@ -39,7 +39,7 @@ public class OreMiningNotifier implements Listener {
         this.config = new OreMiningConfig(plugin);
         this.databaseManager = plugin.getDatabaseManager();
         this.messageManager = plugin.getMessageManager();
-        this.webhookManager = plugin.getWebhookManager();
+        this.oreMiningWebhook = plugin.getOreMiningWebhook();
         this.miningSessions = new ConcurrentHashMap<>();
         this.ignoredPlayers = new HashSet<>();
         this.toggledOffPlayers = new HashSet<>();
@@ -106,7 +106,7 @@ public class OreMiningNotifier implements Listener {
             if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify") 
                     && !ignoredPlayers.contains(nearestPlayer.getUniqueId())) {
                 // Send TNT mining webhook notification
-                webhookManager.sendIndividualBlockNotification(nearestPlayer, material, block.getLocation(), true);
+                oreMiningWebhook.sendIndividualBlockNotification(nearestPlayer, material, block.getLocation(), true);
                 handleDelayedNotification(nearestPlayer, material, block.getLocation());
             }
         }
@@ -251,7 +251,7 @@ public class OreMiningNotifier implements Listener {
         session.addBlock(material);
 
         // Send individual block webhook notification
-        webhookManager.sendIndividualBlockNotification(player, material, location, false);
+        oreMiningWebhook.sendIndividualBlockNotification(player, material, location, false);
 
         // Schedule delayed notification if not already scheduled
         if (!session.isNotificationScheduled()) {
@@ -275,7 +275,7 @@ public class OreMiningNotifier implements Listener {
         long sessionDuration = session.getSessionDuration();
 
         // Send batched session webhook notification
-        webhookManager.sendBatchedSessionNotification(player, minedBlocks, totalBlocks, sessionDuration);
+        oreMiningWebhook.sendBatchedSessionNotification(player, minedBlocks, totalBlocks, sessionDuration);
 
         // Create batched message
         String message = createBatchedMessage(player, minedBlocks, totalBlocks, sessionDuration);

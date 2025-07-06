@@ -11,6 +11,7 @@ import xyz.dapirates.managers.FeatureManager;
 import xyz.dapirates.managers.DatabaseManager;
 import xyz.dapirates.managers.MessageManager;
 import xyz.dapirates.managers.WebhookManager;
+import xyz.dapirates.managers.OreMiningWebhook;
 import xyz.dapirates.managers.ConfigManager;
 import xyz.dapirates.utils.OreMiningConfig;
 
@@ -28,6 +29,7 @@ public class Core extends JavaPlugin {
     private DatabaseManager databaseManager;
     private MessageManager messageManager;
     private WebhookManager webhookManager;
+    private OreMiningWebhook oreMiningWebhook;
     private ConfigManager configManager;
 
     @Override
@@ -75,6 +77,7 @@ public class Core extends JavaPlugin {
         databaseManager = new DatabaseManager(this);
         messageManager = new MessageManager(this);
         webhookManager = new WebhookManager(this);
+        oreMiningWebhook = new OreMiningWebhook(this, webhookManager);
         configManager = new ConfigManager(this, oreMiningConfig, webhookManager);
 
         // Initialize ore mining feature after managers
@@ -99,6 +102,10 @@ public class Core extends JavaPlugin {
 
     public WebhookManager getWebhookManager() {
         return webhookManager;
+    }
+
+    public OreMiningWebhook getOreMiningWebhook() {
+        return oreMiningWebhook;
     }
 
     public ConfigManager getConfigManager() {
