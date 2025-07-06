@@ -110,10 +110,10 @@ public class OreMiningConfig {
     }
 
     private void setupBlockDefaults(Material material, String message, Sound sound) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.addDefault(path + ".enabled", true);
         config.addDefault(path + ".message", message);
-        config.addDefault(path + ".sound", sound.name());
+        config.addDefault(path + ".sound", sound.key().asString());
         config.addDefault(path + ".show-coordinates", true);
         config.addDefault(path + ".commands", Arrays.asList());
     }
@@ -229,19 +229,19 @@ public class OreMiningConfig {
 
     // Block tracking
     public boolean isBlockTracked(Material material) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         return config.getBoolean(path + ".enabled", false);
     }
 
     public String getCustomMessage(Material material, Player player, org.bukkit.Location location, boolean isTNT) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         String message = config.getString(path + ".message", "§a[OreMining] §f{player} found {block}!");
 
         boolean showCoords = config.getBoolean(path + ".show-coordinates", true);
 
         message = message
                 .replace("{player}", player.getName())
-                .replace("{block}", material.name().replace("_", " "))
+                .replace("{block}", material.getKey().getKey().replace("_", " "))
                 .replace("{world}", location.getWorld().getName());
 
         if (showCoords) {
@@ -264,39 +264,39 @@ public class OreMiningConfig {
     }
 
     public Sound getCustomSound(Material material) {
-        String path = "blocks." + material.name().toLowerCase();
-        String soundName = config.getString(path + ".sound", "BLOCK_NOTE_BLOCK_PLING");
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
+        String soundName = config.getString(path + ".sound", "block.note_block.pling");
 
         try {
-            return Sound.valueOf(soundName);
+            return Sound.valueOf(soundName.toUpperCase().replace(".", "_"));
         } catch (IllegalArgumentException e) {
             return Sound.BLOCK_NOTE_BLOCK_PLING;
         }
     }
 
     public List<String> getCustomCommands(Material material) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         return config.getStringList(path + ".commands");
     }
 
     public boolean isShowCoordinates(Material material) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         return config.getBoolean(path + ".show-coordinates", true);
     }
 
     // Block management
     public void addTrackedBlock(Material material, String message, Sound sound, boolean showCoords) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.set(path + ".enabled", true);
         config.set(path + ".message", message);
-        config.set(path + ".sound", sound.name());
+        config.set(path + ".sound", sound.key().asString());
         config.set(path + ".show-coordinates", showCoords);
         config.set(path + ".commands", Arrays.asList());
         saveConfig();
     }
 
     public void removeTrackedBlock(Material material) {
-        String path = "blocks." + material.name().toLowerCase();
+        String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.set(path, null);
         saveConfig();
     }

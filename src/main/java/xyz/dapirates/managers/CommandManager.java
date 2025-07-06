@@ -6,9 +6,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import xyz.dapirates.command.OreMiningCommand;
 import xyz.dapirates.command.ShowCommand;
 import xyz.dapirates.features.OreMiningNotifier;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CommandManager {
 
@@ -23,21 +23,26 @@ public class CommandManager {
     }
 
     public void registerCommands(OreMiningNotifier oreMiningNotifier) {
-        // Register existing commands
-        registerCommand("show", new ShowCommand());
-
+        // Register commands using a more abstract approach
+        registerCommand("show", ShowCommand::new);
+        
         // Register ore mining commands
         OreMiningCommand oreMiningCommand = new OreMiningCommand((xyz.dapirates.Core) plugin, oreMiningNotifier);
         registerCommand("oremining", oreMiningCommand);
         registerTabCompleter("oremining", oreMiningCommand);
 
         // Register pirates command
-        registerCommand("pirates", new xyz.dapirates.command.PiratesCommand((xyz.dapirates.Core) plugin));
+        registerCommand("pirates", () -> new xyz.dapirates.command.PiratesCommand((xyz.dapirates.Core) plugin));
     }
 
     private void registerCommand(String name, CommandExecutor executor) {
         commands.put(name, executor);
         plugin.getCommand(name).setExecutor(executor);
+    }
+
+    private void registerCommand(String name, Supplier<CommandExecutor> executorSupplier) {
+        CommandExecutor executor = executorSupplier.get();
+        registerCommand(name, executor);
     }
 
     private void registerTabCompleter(String name, TabCompleter completer) {

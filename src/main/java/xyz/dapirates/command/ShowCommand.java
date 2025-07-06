@@ -2,7 +2,7 @@ package xyz.dapirates.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class ShowCommand implements CommandExecutor {
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -29,8 +31,8 @@ public class ShowCommand implements CommandExecutor {
 
         // Get the item's display name component (preserves exact formatting and color)
         Component rawNameComponent = item.displayName();
-        String rawNameWithCodes = LegacyComponentSerializer.legacySection().serialize(rawNameComponent);
-        // Remove color codes (e.g., §a) for bracket check
+        String rawNameWithCodes = MINI_MESSAGE.serialize(rawNameComponent);
+        // Remove color codes for bracket check
         String rawNamePlain = rawNameWithCodes.replaceAll("§[0-9a-fk-or]", "");
         Component itemComponent = rawNameComponent;
 
@@ -51,8 +53,8 @@ public class ShowCommand implements CommandExecutor {
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
             String loreInfo = item.getItemMeta().getLore().get(0); // Get first lore line
             if (loreInfo != null && !loreInfo.isEmpty()) {
-                // Convert lore color codes to component
-                Component loreComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(loreInfo);
+                // Convert lore color codes to component using MiniMessage
+                Component loreComponent = MINI_MESSAGE.deserialize(loreInfo);
                 itemComponent = itemComponent.append(Component.text(" shows ", NamedTextColor.WHITE))
                         .append(loreComponent);
             }
@@ -69,8 +71,8 @@ public class ShowCommand implements CommandExecutor {
             if (user != null) {
                 String prefix = user.getCachedData().getMetaData().getPrefix();
                 if (prefix != null) {
-                    // Convert color codes to component using LegacyComponentSerializer
-                    playerPrefixComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(prefix);
+                    // Convert color codes to component using MiniMessage
+                    playerPrefixComponent = MINI_MESSAGE.deserialize(prefix);
                 }
             }
         } catch (Exception e) {

@@ -1,11 +1,7 @@
 package xyz.dapirates;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.dapirates.features.BetterMending;
 import xyz.dapirates.features.OreMiningNotifier;
-import xyz.dapirates.command.ShowCommand;
-import xyz.dapirates.command.OreMiningCommand;
 import xyz.dapirates.managers.CommandManager;
 import xyz.dapirates.managers.FeatureManager;
 import xyz.dapirates.managers.DatabaseManager;
@@ -14,11 +10,6 @@ import xyz.dapirates.managers.WebhookManager;
 import xyz.dapirates.managers.OreMiningWebhook;
 import xyz.dapirates.managers.ConfigManager;
 import xyz.dapirates.utils.OreMiningConfig;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class Core extends JavaPlugin {
 
@@ -71,7 +62,7 @@ public class Core extends JavaPlugin {
         // Initialize ore mining config
         oreMiningConfig = new OreMiningConfig(this);
 
-        // Initialize managers first
+        // Initialize managers using a more abstract approach
         commandManager = new CommandManager(this);
         featureManager = new FeatureManager(this);
         databaseManager = new DatabaseManager(this);

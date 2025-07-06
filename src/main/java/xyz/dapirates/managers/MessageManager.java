@@ -5,11 +5,9 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import xyz.dapirates.Core;
 
 import java.util.List;
@@ -19,6 +17,7 @@ public class MessageManager {
 
     private final Core plugin;
     private final boolean placeholderApiEnabled;
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     public MessageManager(Core plugin) {
         this.plugin = plugin;
@@ -139,8 +138,8 @@ public class MessageManager {
 
     public void sendConsoleMessage(String message) {
         if (plugin.getOreMiningConfig().getMessageFormat().equalsIgnoreCase("json")) {
-            // Convert JSON to legacy for console
-            Component component = LegacyComponentSerializer.legacySection().deserialize(message);
+            // Convert JSON to plain text for console
+            Component component = MINI_MESSAGE.deserialize(message);
             plugin.getServer().getConsoleSender().sendMessage(component);
         } else {
             plugin.getServer().getConsoleSender().sendMessage(message);
