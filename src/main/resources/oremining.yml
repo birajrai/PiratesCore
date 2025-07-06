@@ -19,6 +19,12 @@ general:
   
   # Message format: "text" or "json" (for rich text with clickable elements)
   message-format: "text"
+  
+  # Delayed notification settings
+  delayed-notifications:
+    enabled: true
+    delay-seconds: 30
+    batch-messages: true
 
 # Height and light level controls
 controls:
