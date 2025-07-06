@@ -1,0 +1,134 @@
+# Discord Webhook Configuration for OreMining
+# This file contains webhook settings for Discord notifications
+
+oremining:
+  # Enable/disable Discord webhook notifications
+  enabled: false
+  
+  # Discord webhook URL (replace with your actual webhook URL)
+  webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+  
+  # Webhook username (optional, will use bot name if not set)
+  username: "OreMining Bot"
+  
+  # Webhook avatar URL (optional, will use bot avatar if not set)
+  avatar-url: ""
+  
+  # Embed settings
+  embed:
+    # Enable/disable embeds (if false, sends plain text)
+    enabled: true
+    
+    # Embed title
+    title: "⛏️ Ore Mining Activity"
+    
+    # Embed color (hex color code)
+    color: "#00ff00"
+    
+    # Embed footer text
+    footer: "OreMining Notifications"
+    
+    # Embed footer icon URL
+    footer-icon: "https://i.imgur.com/8tBXd6H.png"
+    
+    # Show server name in embed
+    show-server-name: true
+    
+    # Show coordinates in embed
+    show-coordinates: true
+    
+    # Show timestamp in embed
+    show-timestamp: true
+    
+    # Show player avatar in embed
+    show-player-avatar: true
+    
+    # Thumbnail settings
+    thumbnail:
+      # Enable/disable thumbnail
+      enabled: true
+      # Use player avatar as thumbnail
+      use-player-avatar: true
+      # Custom thumbnail URL (used if use-player-avatar is false)
+      custom-url: ""
+    
+    # Field settings
+    fields:
+      # Show player name field
+      show-player: true
+      # Show block type field
+      show-block: true
+      # Show coordinates field
+      show-coordinates: true
+      # Show world field
+      show-world: true
+      # Show session duration field (for batched notifications)
+      show-duration: true
+      # Show total blocks field (for batched notifications)
+      show-total: true
+  
+  # Notification settings
+  notifications:
+    # Send notifications for individual block mining
+    individual-blocks: true
+    
+    # Send notifications for batched mining sessions
+    batched-sessions: true
+    
+    # Send notifications for TNT mining
+    tnt-mining: true
+    
+    # Minimum blocks required for batched notification
+    min-blocks-for-batch: 1
+    
+    # Include console notifications in webhook
+    include-console: false
+    
+    # Rate limiting (messages per minute, 0 = no limit)
+    rate-limit: 0
+  
+  # Block-specific settings
+  blocks:
+    # Custom colors for different ore types
+    colors:
+      diamond_ore: "#00ffff"
+      deepslate_diamond_ore: "#00ffff"
+      emerald_ore: "#00ff00"
+      deepslate_emerald_ore: "#00ff00"
+      gold_ore: "#ffd700"
+      deepslate_gold_ore: "#ffd700"
+      iron_ore: "#c0c0c0"
+      deepslate_iron_ore: "#c0c0c0"
+      copper_ore: "#cd7f32"
+      deepslate_copper_ore: "#cd7f32"
+      coal_ore: "#696969"
+      deepslate_coal_ore: "#696969"
+      redstone_ore: "#ff0000"
+      deepslate_redstone_ore: "#ff0000"
+      lapis_ore: "#0000ff"
+      deepslate_lapis_ore: "#0000ff"
+      ancient_debris: "#800080"
+      nether_gold_ore: "#ffd700"
+      nether_quartz_ore: "#ffffff"
+    
+    # Custom emojis for different ore types
+    emojis:
+      diamond_ore: "💎"
+      deepslate_diamond_ore: "💎"
+      emerald_ore: "💚"
+      deepslate_emerald_ore: "💚"
+      gold_ore: "🟡"
+      deepslate_gold_ore: "🟡"
+      iron_ore: "⚙️"
+      deepslate_iron_ore: "⚙️"
+      copper_ore: "🟠"
+      deepslate_copper_ore: "🟠"
+      coal_ore: "⚫"
+      deepslate_coal_ore: "⚫"
+      redstone_ore: "🔴"
+      deepslate_redstone_ore: "🔴"
+      lapis_ore: "🔵"
+      deepslate_lapis_ore: "🔵"
+      ancient_debris: "🟣"
+      nether_gold_ore: "🟡"
+      nether_quartz_ore: "⚪" 
