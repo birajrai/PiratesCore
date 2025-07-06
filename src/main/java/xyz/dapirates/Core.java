@@ -3,7 +3,7 @@ package xyz.dapirates;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.dapirates.features.BetterMending;
-import xyz.dapirates.features.ShowCommand;
+import xyz.dapirates.command.ShowCommand;
 
 public class Core extends JavaPlugin {
     @Override
