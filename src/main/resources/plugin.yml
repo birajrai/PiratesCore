@@ -3,7 +3,7 @@ main: xyz.dapirates.core.Core
 version: ${version}
 website: "https://www.dapirates.xyz/"
 author: KiratDewas
-prefix: PiratesAddons
+prefix: PiratesCore
 description: ${description}
 api-version: 1.21
 
