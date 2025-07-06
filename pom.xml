@@ -9,7 +9,7 @@
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>piratescore</name>
+    <name>PiratesCore</name>
     <description>A small quality of life tweak to the Mending enchantment. Only supports PaperMC 1.21.7</description>
 
     <properties>
