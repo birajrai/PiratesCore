@@ -1,6 +1,5 @@
 package xyz.dapirates.features;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -23,32 +22,72 @@ public class BetterMending implements Listener {
                 player.getGameMode() == GameMode.CREATIVE)
             return;
 
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (item == null || item.getType() == Material.AIR)
-            return;
-        if (!item.containsEnchantment(Enchantment.MENDING))
-            return;
-        if (!(item.getItemMeta() instanceof Damageable))
-            return;
-        Damageable meta = (Damageable) item.getItemMeta();
-        if (!meta.hasDamage())
-            return;
-        if (!player.isSneaking() || e.getAction() != Action.RIGHT_CLICK_AIR)
+        if (!player.isSneaking())
             return;
 
-        int expValue = 20; // Default value, config not available here
-        int playerXP = getPlayerXP(player);
-        int itemDamage = meta.getDamage();
-        if (playerXP < expValue)
-            return;
+        // Right click for main hand items
+        if (e.getAction() == Action.RIGHT_CLICK_AIR) {
+            ItemStack item = player.getInventory().getItemInMainHand();
+            if (item == null || item.getType() == Material.AIR)
+                return;
+            if (!item.containsEnchantment(Enchantment.MENDING))
+                return;
+            if (!(item.getItemMeta() instanceof Damageable))
+                return;
+            Damageable meta = (Damageable) item.getItemMeta();
+            if (!meta.hasDamage())
+                return;
 
-        int newDamage = Math.max(0, itemDamage - expValue);
-        meta.setDamage(newDamage);
-        item.setItemMeta(meta);
-        changePlayerExp(player, -expValue);
+            int expValue = 20; // Default value, config not available here
+            int playerXP = getPlayerXP(player);
+            int itemDamage = meta.getDamage();
+            if (playerXP < expValue)
+                return;
 
-        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
-        e.setCancelled(true);
+            int newDamage = Math.max(0, itemDamage - expValue);
+            meta.setDamage(newDamage);
+            item.setItemMeta(meta);
+            changePlayerExp(player, -expValue);
+
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
+            e.setCancelled(true);
+        }
+        // Left click for armor/elytra
+        else if (e.getAction() == Action.LEFT_CLICK_AIR) {
+            ItemStack[] armorContents = player.getInventory().getArmorContents();
+            for (int i = 0; i < armorContents.length; i++) {
+                ItemStack armorItem = armorContents[i];
+                if (armorItem != null && armorItem.getType() != Material.AIR) {
+                    if (!armorItem.containsEnchantment(Enchantment.MENDING))
+                        continue;
+                    if (!(armorItem.getItemMeta() instanceof Damageable))
+                        continue;
+
+                    Damageable meta = (Damageable) armorItem.getItemMeta();
+                    if (!meta.hasDamage())
+                        continue;
+
+                    int expValue = 20; // Default value, config not available here
+                    int playerXP = getPlayerXP(player);
+                    int itemDamage = meta.getDamage();
+                    if (playerXP < expValue)
+                        continue;
+
+                    int newDamage = Math.max(0, itemDamage - expValue);
+                    meta.setDamage(newDamage);
+                    armorItem.setItemMeta(meta);
+                    changePlayerExp(player, -expValue);
+
+                    // Update the armor slot with the repaired item
+                    armorContents[i] = armorItem;
+                    player.getInventory().setArmorContents(armorContents);
+
+                    player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
+                    e.setCancelled(true);
+                    return;
+                }
+            }
+        }
     }
 
     // Utility: get total player XP

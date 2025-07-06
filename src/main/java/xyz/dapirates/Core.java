@@ -15,4 +15,4 @@ public class Core extends JavaPlugin {
     public void onDisable() {
         getLogger().info("Core plugin disabled!");
     }
-} 
+}
