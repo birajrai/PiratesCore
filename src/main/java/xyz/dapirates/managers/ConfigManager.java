@@ -19,4 +19,4 @@ public class ConfigManager {
         webhookManager.reloadConfig();
         plugin.getLogger().info("All configs reloaded.");
     }
-} 
+}

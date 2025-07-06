@@ -335,7 +335,8 @@ public class DatabaseManager {
         }
     }
 
-    private void saveOreMiningSession(Connection conn, UUID playerId, Map<Material, Integer> minedBlocks) throws SQLException {
+    private void saveOreMiningSession(Connection conn, UUID playerId, Map<Material, Integer> minedBlocks)
+            throws SQLException {
         // Create or update player stats entry
         String upsertPlayer = """
                 MERGE INTO player_stats (player_uuid, player_name, total_blocks, last_updated)

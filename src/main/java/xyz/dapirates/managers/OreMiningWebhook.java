@@ -20,32 +20,33 @@ public class OreMiningWebhook {
 
     public void sendIndividualBlockNotification(Player player, Material material, Location location, boolean isTNT) {
         String title = isTNT ? "💥 TNT Mining Alert" : "⛏️ Ore Mining Alert";
-        String description = String.format("**%s** found **%s**", 
-            player.getName(), 
-            getPrettyOreName(material));
-        
+        String description = String.format("**%s** found **%s**",
+                player.getName(),
+                getPrettyOreName(material));
+
         List<WebhookManager.Field> fields = new ArrayList<>();
         fields.add(new WebhookManager.Field("Player", player.getName(), true));
         fields.add(new WebhookManager.Field("Ore", getPrettyOreName(material), true));
         fields.add(new WebhookManager.Field("Method", isTNT ? "TNT" : "Mining", true));
-        fields.add(new WebhookManager.Field("Location", String.format("X: %d, Y: %d, Z: %d", 
-            location.getBlockX(), location.getBlockY(), location.getBlockZ()), false));
+        fields.add(new WebhookManager.Field("Location", String.format("X: %d, Y: %d, Z: %d",
+                location.getBlockX(), location.getBlockY(), location.getBlockZ()), false));
         fields.add(new WebhookManager.Field("World", location.getWorld().getName(), false));
-        
+
         String color = getOreColor(material);
-        
+
         webhookManager.sendEmbed(WEBHOOK_NAME, title, description, fields, color, null, "Ore Mining Notifier");
     }
 
-    public void sendBatchedSessionNotification(Player player, Map<Material, Integer> minedBlocks, int totalBlocks, long sessionDuration) {
+    public void sendBatchedSessionNotification(Player player, Map<Material, Integer> minedBlocks, int totalBlocks,
+            long sessionDuration) {
         String title = "📊 Mining Session Summary";
         String description = String.format("**%s** completed a mining session", player.getName());
-        
+
         List<WebhookManager.Field> fields = new ArrayList<>();
         fields.add(new WebhookManager.Field("Player", player.getName(), true));
         fields.add(new WebhookManager.Field("Total Blocks", String.valueOf(totalBlocks), true));
         fields.add(new WebhookManager.Field("Duration", formatDuration(sessionDuration), true));
-        
+
         // Add ore breakdown
         StringBuilder oreBreakdown = new StringBuilder();
         for (Map.Entry<Material, Integer> entry : minedBlocks.entrySet()) {
@@ -53,13 +54,13 @@ public class OreMiningWebhook {
             int count = entry.getValue();
             oreBreakdown.append(String.format("%s: **%d**\n", oreName, count));
         }
-        
+
         if (oreBreakdown.length() > 0) {
             fields.add(new WebhookManager.Field("Ores Found", oreBreakdown.toString(), false));
         }
-        
+
         String color = "00ff00"; // Green for session summary
-        
+
         webhookManager.sendEmbed(WEBHOOK_NAME, title, description, fields, color, null, "Ore Mining Notifier");
     }
 
@@ -139,11 +140,11 @@ public class OreMiningWebhook {
         long seconds = durationMs / 1000;
         long minutes = seconds / 60;
         seconds = seconds % 60;
-        
+
         if (minutes > 0) {
             return String.format("%dm %ds", minutes, seconds);
         } else {
             return String.format("%ds", seconds);
         }
     }
-} 
+}

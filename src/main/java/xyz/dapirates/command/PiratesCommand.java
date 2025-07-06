@@ -26,4 +26,4 @@ public class PiratesCommand implements CommandExecutor {
         sender.sendMessage("§7Usage: /pirates reload");
         return true;
     }
-} 
+}

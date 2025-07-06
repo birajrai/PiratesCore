@@ -110,7 +110,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 plugin.getLogger().warning("Failed to load player stats: " + e.getMessage());
             }
         }
-        
+
         if (stats == null) {
             sender.sendMessage("§cNo statistics found for " + player.getName());
             return;
@@ -193,7 +193,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
         String action = args[1].toLowerCase();
         String playerName = args[2];
         Player targetPlayer = Bukkit.getPlayer(playerName);
-        
+
         if (targetPlayer == null) {
             sender.sendMessage("§cPlayer not found: " + playerName);
             return;
