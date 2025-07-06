@@ -37,12 +37,23 @@ public class WebhookManager {
         }
         config = YamlConfiguration.loadConfiguration(configFile);
         webhooks = new HashMap<>();
-        
-        // Load all webhook URLs from the config
-        for (String key : config.getKeys(false)) {
-            String url = config.getString(key);
-            if (url != null && !url.isEmpty() && !url.contains("YOUR_WEBHOOK_URL_HERE")) {
-                webhooks.put(key, url);
+
+        // Support old format: webhooks: { name: url }
+        if (config.isConfigurationSection("webhooks")) {
+            plugin.getLogger().warning("[PiratesAddons] Detected old webhook.yml format (webhooks: section). Please migrate to the new flat format.");
+            for (String key : config.getConfigurationSection("webhooks").getKeys(false)) {
+                String url = config.getString("webhooks." + key);
+                if (url != null && !url.isEmpty() && !url.contains("YOUR_WEBHOOK_URL_HERE")) {
+                    webhooks.put(key, url);
+                }
+            }
+        } else {
+            // New format: top-level keys
+            for (String key : config.getKeys(false)) {
+                String url = config.getString(key);
+                if (url != null && !url.isEmpty() && !url.contains("YOUR_WEBHOOK_URL_HERE")) {
+                    webhooks.put(key, url);
+                }
             }
         }
     }

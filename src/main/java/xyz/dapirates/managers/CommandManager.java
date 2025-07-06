@@ -30,6 +30,9 @@ public class CommandManager {
         OreMiningCommand oreMiningCommand = new OreMiningCommand((xyz.dapirates.Core) plugin, oreMiningNotifier);
         registerCommand("oremining", oreMiningCommand);
         registerTabCompleter("oremining", oreMiningCommand);
+
+        // Register pirates command
+        registerCommand("pirates", new xyz.dapirates.command.PiratesCommand((xyz.dapirates.Core) plugin));
     }
     
     private void registerCommand(String name, CommandExecutor executor) {

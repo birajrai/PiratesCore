@@ -21,6 +21,9 @@ commands:
   pirates:
     description: Reload all PiratesAddons configs
     usage: /pirates reload
+  pirates.reload:
+    description: Allows reloading all PiratesAddons configs
+    default: op
 
 permissions:
   pc.ores.notify:
