@@ -76,4 +76,8 @@ public class FeatureManager {
     public void unregisterAll() {
         features.clear();
     }
+
+    public void reloadSettings() {
+        loadSettings();
+    }
 }

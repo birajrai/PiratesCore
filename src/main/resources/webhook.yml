@@ -3,3 +3,4 @@
 # Format: feature_name: "webhook_url"
 
 oremining: "https://discordapp.com/api/webhooks/1391333891398307860/V3pyHjoAP8laVvhxCKwIPLUc5HazXu-9cIZpz-hFn_xrpgU4b3amrIEFXw7e4-OgM-dq" 
+badword: "https://discord.com/api/webhooks/1391417051565916221/VwcgyMbsAg4iBrnbArdJSZv7Lu9F2j-SN33vfPTIxPAb2slt-Uby4O07Hp_HAZmIaeQi" 

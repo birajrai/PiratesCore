@@ -17,6 +17,8 @@ public class ConfigManager {
     public void reloadAll() {
         oreMiningConfig.reloadConfig();
         webhookManager.reloadConfig();
+        plugin.getChatFilterListener().reload();
+        plugin.getFeatureManager().reloadSettings();
         plugin.getLogger().info("All configs reloaded.");
     }
 }

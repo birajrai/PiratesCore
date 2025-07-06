@@ -20,6 +20,7 @@ public class PiratesCommand implements CommandExecutor {
                 return true;
             }
             plugin.getConfigManager().reloadAll();
+            plugin.getChatFilterListener().reload();
             sender.sendMessage("§a[PiratesAddons] All configs reloaded!");
             return true;
         }

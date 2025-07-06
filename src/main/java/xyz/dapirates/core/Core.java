@@ -2,6 +2,7 @@ package xyz.dapirates.core;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.dapirates.listener.OreMiningListener;
+import xyz.dapirates.listener.ChatFilterListener;
 import xyz.dapirates.manager.CommandManager;
 import xyz.dapirates.manager.FeatureManager;
 import xyz.dapirates.manager.DatabaseManager;
@@ -22,6 +23,7 @@ public class Core extends JavaPlugin {
     private WebhookManager webhookManager;
     private OreMiningWebhook oreMiningWebhook;
     private ConfigManager configManager;
+    private ChatFilterListener chatFilterListener;
 
     @Override
     public void onEnable() {
@@ -33,6 +35,10 @@ public class Core extends JavaPlugin {
 
         // Register commands
         commandManager.registerCommands(oreMiningListener);
+
+        // Register chat filter listener
+        chatFilterListener = new ChatFilterListener(this);
+        getServer().getPluginManager().registerEvents(chatFilterListener, this);
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
@@ -103,4 +109,11 @@ public class Core extends JavaPlugin {
         return configManager;
     }
 
+    public ChatFilterListener getChatFilterListener() {
+        return chatFilterListener;
+    }
+
+    public FeatureManager getFeatureManager() {
+        return featureManager;
+    }
 }
