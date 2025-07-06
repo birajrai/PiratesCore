@@ -30,6 +30,12 @@ public class ShowCommand implements CommandExecutor {
         // Get the item's display name component (preserves exact formatting and color)
         Component itemComponent = item.displayName();
         
+        // Add quantity if more than 1 item
+        int quantity = item.getAmount();
+        if (quantity > 1) {
+            itemComponent = itemComponent.append(Component.text(" x" + quantity, NamedTextColor.GRAY));
+        }
+        
         // Add hover event to show item details
         itemComponent = itemComponent.hoverEvent(item.asHoverEvent());
         
