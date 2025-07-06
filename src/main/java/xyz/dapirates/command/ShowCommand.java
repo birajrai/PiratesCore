@@ -2,6 +2,7 @@ package xyz.dapirates.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -40,14 +41,15 @@ public class ShowCommand implements CommandExecutor {
         itemComponent = itemComponent.hoverEvent(item.asHoverEvent());
         
         // Get player's prefix from LuckPerms
-        String playerPrefix = "";
+        Component playerPrefixComponent = Component.empty();
         try {
             LuckPerms luckPerms = LuckPermsProvider.get();
             User user = luckPerms.getUserManager().getUser(player.getUniqueId());
             if (user != null) {
                 String prefix = user.getCachedData().getMetaData().getPrefix();
                 if (prefix != null) {
-                    playerPrefix = prefix;
+                    // Convert color codes to component using LegacyComponentSerializer
+                    playerPrefixComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(prefix);
                 }
             }
         } catch (Exception e) {
@@ -55,9 +57,14 @@ public class ShowCommand implements CommandExecutor {
         }
         
         // Create message with prefix and item
-        Component message = Component.text(playerPrefix + player.getName() + " shows you the item [", NamedTextColor.GREEN)
+        Component message = Component.text(player.getName() + " shows you the item [", NamedTextColor.GREEN)
             .append(itemComponent)
             .append(Component.text("]", NamedTextColor.GREEN));
+        
+        // Insert prefix at the beginning
+        if (!playerPrefixComponent.equals(Component.empty())) {
+            message = playerPrefixComponent.append(message);
+        }
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(message);
         }
