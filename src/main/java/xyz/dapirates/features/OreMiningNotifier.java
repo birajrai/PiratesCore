@@ -29,8 +29,6 @@ public class OreMiningNotifier implements Listener {
     private final OreMiningConfig config;
     private final DatabaseManager databaseManager;
     private final MessageManager messageManager;
-    private final Map<UUID, OreMiningStats> playerStats;
-    private final Map<UUID, Long> lastMiningTime;
     private final Map<UUID, MiningSession> miningSessions;
     private final Set<UUID> whitelistedPlayers;
     private final Set<UUID> toggledOffPlayers;
@@ -40,13 +38,9 @@ public class OreMiningNotifier implements Listener {
         this.config = new OreMiningConfig(plugin);
         this.databaseManager = plugin.getDatabaseManager();
         this.messageManager = plugin.getMessageManager();
-        this.playerStats = new ConcurrentHashMap<>();
-        this.lastMiningTime = new ConcurrentHashMap<>();
         this.miningSessions = new ConcurrentHashMap<>();
         this.whitelistedPlayers = new HashSet<>();
         this.toggledOffPlayers = new HashSet<>();
-
-        // Load whitelisted players from config
         loadWhitelistedPlayers();
     }
 
@@ -81,19 +75,10 @@ public class OreMiningNotifier implements Listener {
             return;
         }
 
-        // Update player stats
-        updatePlayerStats(player, material, block.getLocation());
-
-        // Handle delayed notifications
-        if (config.isDelayedNotificationsEnabled()) {
-            handleDelayedNotification(player, material, block.getLocation());
-        } else {
-            // Send immediate notifications
-            sendOreMiningNotification(player, material, block.getLocation());
-        }
-
-        // Execute custom commands
-        executeCustomCommands(player, material, block.getLocation());
+        // Only update session data
+        handleDelayedNotification(player, material, block.getLocation());
+        // No legacy stats, no in-memory stats, no mining history
+        // No DB write here
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -120,16 +105,20 @@ public class OreMiningNotifier implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        // No stats to initialize
         Player player = event.getPlayer();
-
-        // Initialize player stats if not exists
-        if (!playerStats.containsKey(player.getUniqueId())) {
-            playerStats.put(player.getUniqueId(), new OreMiningStats(player.getUniqueId()));
-        }
-
-        // Send welcome message if player has permission
         if (player.hasPermission("pc.ores.notify")) {
             sendWelcomeMessage(player);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        UUID playerId = player.getUniqueId();
+        MiningSession session = miningSessions.remove(playerId);
+        if (session != null && session.hasMinedBlocks()) {
+            saveSessionAsync(playerId, session);
         }
     }
 
@@ -512,18 +501,19 @@ public class OreMiningNotifier implements Listener {
     }
 
     public void flushAllMiningSessionsToStats() {
+        // On server stop, save all sessions to DB asynchronously
         for (Map.Entry<UUID, MiningSession> entry : miningSessions.entrySet()) {
             UUID playerId = entry.getKey();
             MiningSession session = entry.getValue();
             if (session != null && session.hasMinedBlocks()) {
-                OreMiningStats stats = playerStats.computeIfAbsent(playerId, OreMiningStats::new);
-                for (Map.Entry<org.bukkit.Material, Integer> blockEntry : session.getMinedBlocks().entrySet()) {
-                    for (int i = 0; i < blockEntry.getValue(); i++) {
-                        stats.addBlock(blockEntry.getKey());
-                    }
-                }
+                saveSessionAsync(playerId, session);
             }
         }
         miningSessions.clear();
+    }
+
+    private void saveSessionAsync(UUID playerId, MiningSession session) {
+        // Save the session data to H2 asynchronously
+        databaseManager.saveOreMiningSessionAsync(playerId, session.getMinedBlocks());
     }
 }
