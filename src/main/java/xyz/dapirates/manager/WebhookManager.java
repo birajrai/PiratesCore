@@ -26,14 +26,14 @@ public class WebhookManager {
 
     public WebhookManager(Core plugin) {
         this.plugin = plugin;
-        this.configFile = new File(plugin.getDataFolder(), "webhook.yml");
+        this.configFile = new File(plugin.getDataFolder(), "Webhook.yml");
         this.httpClient = HttpClient.newHttpClient();
         loadConfig();
     }
 
     public void loadConfig() {
         if (!configFile.exists()) {
-            plugin.saveResource("webhook.yml", false);
+            plugin.saveResource("Webhook.yml", false);
         }
         config = YamlConfiguration.loadConfiguration(configFile);
         webhooks = new HashMap<>();
@@ -41,7 +41,7 @@ public class WebhookManager {
         // Support old format: webhooks: { name: url }
         if (config.isConfigurationSection("webhooks")) {
             plugin.getLogger().warning(
-                    "[PiratesAddons] Detected old webhook.yml format (webhooks: section). Please migrate to the new flat format.");
+                    "[PiratesAddons] Detected old Webhook.yml format (webhooks: section). Please migrate to the new flat format.");
             for (String key : config.getConfigurationSection("webhooks").getKeys(false)) {
                 String url = config.getString("webhooks." + key);
                 if (url != null && !url.isEmpty() && !url.contains("YOUR_WEBHOOK_URL_HERE")) {

@@ -30,15 +30,11 @@ public class Core extends JavaPlugin {
         // Initialize managers
         initializeManagers();
 
-        // Register features
+        // Register features (now includes ChatFilter)
         featureManager.registerFeatures();
 
         // Register commands
         commandManager.registerCommands(oreMiningListener);
-
-        // Register chat filter listener
-        chatFilterListener = new ChatFilterListener(this);
-        getServer().getPluginManager().registerEvents(chatFilterListener, this);
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
@@ -110,7 +106,7 @@ public class Core extends JavaPlugin {
     }
 
     public ChatFilterListener getChatFilterListener() {
-        return chatFilterListener;
+        return featureManager.getChatFilterListener();
     }
 
     public FeatureManager getFeatureManager() {

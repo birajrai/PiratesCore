@@ -18,12 +18,17 @@ import xyz.dapirates.manager.WebhookManager;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 
 public class ChatFilterListener implements Listener {
     private final Set<String> badWords = new HashSet<>();
     private final JavaPlugin plugin;
     private final Core core;
     private final WebhookManager webhookManager;
+
+    private static final int CHAT_HISTORY_SIZE = 5;
+    private static final Deque<String> chatHistory = new LinkedList<>();
 
     private void loadBadWords() {
         badWords.clear();
@@ -72,6 +77,13 @@ public class ChatFilterListener implements Listener {
                 index = lowerMessage.indexOf(badWord, index + replacement.length());
             }
         }
+        // Add the current message to chat history
+        synchronized (chatHistory) {
+            if (chatHistory.size() >= CHAT_HISTORY_SIZE) {
+                chatHistory.removeFirst();
+            }
+            chatHistory.addLast(event.getPlayer().getName() + ": " + event.getMessage());
+        }
         if (found && foundWord != null) {
             // Send webhook embed
             String playerName = event.getPlayer().getName();
@@ -79,16 +91,24 @@ public class ChatFilterListener implements Listener {
             ArrayList<WebhookManager.Field> fields = new ArrayList<>();
             fields.add(new WebhookManager.Field("Player", playerName, true));
             fields.add(new WebhookManager.Field("Bad Word", foundWord, true));
-            fields.add(new WebhookManager.Field("Time", time, false));
+            fields.add(new WebhookManager.Field("Time", time, true));
+            fields.add(new WebhookManager.Field("Full Message", "```" + event.getMessage() + "```", false));
+            // Add last 5 messages as code block
+            StringBuilder history = new StringBuilder();
+            synchronized (chatHistory) {
+                for (String msg : chatHistory) {
+                    history.append(msg).append("\n");
+                }
+            }
+            fields.add(new WebhookManager.Field("Last 5 Messages", "```" + history.toString().trim() + "```", false));
             webhookManager.sendEmbed(
-                "badword",
-                "🚨 Bad Word Detected",
-                playerName + " used a bad word in chat!",
-                fields,
-                "ff0000", // Red color
-                null,
-                "Chat Filter"
-            );
+                    "badword",
+                    "🚨 Bad Word Detected",
+                    "Player **" + playerName + "** used a prohibited word in chat!",
+                    fields,
+                    "ff0000", // Red color
+                    null,
+                    "Chat Filter Bot | PiratesAddons");
         }
         event.setMessage(message);
     }

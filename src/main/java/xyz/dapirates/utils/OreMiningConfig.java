@@ -22,13 +22,13 @@ public class OreMiningConfig {
 
     public OreMiningConfig(Core plugin) {
         this.plugin = plugin;
-        this.configFile = new File(plugin.getDataFolder(), "oremining.yml");
+        this.configFile = new File(plugin.getDataFolder(), "OreMining.yml");
         loadConfig();
     }
 
     private void loadConfig() {
         if (!configFile.exists()) {
-            plugin.saveResource("oremining.yml", false);
+            plugin.saveResource("OreMining.yml", false);
         }
 
         config = YamlConfiguration.loadConfiguration(configFile);
@@ -122,7 +122,7 @@ public class OreMiningConfig {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save oremining.yml: " + e.getMessage());
+            plugin.getLogger().severe("Could not save OreMining.yml: " + e.getMessage());
         }
     }
 

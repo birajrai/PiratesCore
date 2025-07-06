@@ -8,12 +8,14 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import xyz.dapirates.listener.ChatFilterListener;
 
 public class FeatureManager {
 
     private final JavaPlugin plugin;
     private final Map<String, Object> features;
     private YamlConfiguration settingsConfig;
+    private ChatFilterListener chatFilterListener;
 
     public FeatureManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -21,9 +23,9 @@ public class FeatureManager {
     }
 
     private void loadSettings() {
-        File settingsFile = new File(plugin.getDataFolder(), "settings.yml");
+        File settingsFile = new File(plugin.getDataFolder(), "Settings.yml");
         if (!settingsFile.exists()) {
-            plugin.saveResource("settings.yml", false);
+            plugin.saveResource("Settings.yml", false);
         }
         settingsConfig = YamlConfiguration.loadConfiguration(settingsFile);
     }
@@ -36,6 +38,14 @@ public class FeatureManager {
 
     public void registerFeatures() {
         loadSettings();
+        // Log all features and their status
+        if (settingsConfig != null && settingsConfig.isConfigurationSection("features")) {
+            plugin.getLogger().info("[PiratesAddons] Feature status:");
+            for (String feature : settingsConfig.getConfigurationSection("features").getKeys(false)) {
+                boolean enabled = isFeatureEnabled(feature);
+                plugin.getLogger().info("  - " + feature + ": " + (enabled ? "ENABLED" : "DISABLED"));
+            }
+        }
         // Register features using a more abstract approach
         if (isFeatureEnabled("BetterMending")) {
             registerFeature("bettermending", BetterMending::new);
@@ -44,6 +54,11 @@ public class FeatureManager {
         if (isFeatureEnabled("OreMining")) {
             OreMiningListener oreMiningListener = ((xyz.dapirates.core.Core) plugin).getOreMiningListener();
             registerFeature("oremining", oreMiningListener);
+        }
+        // Register ChatFilter feature
+        if (isFeatureEnabled("ChatFilter")) {
+            chatFilterListener = new ChatFilterListener((xyz.dapirates.core.Core) plugin);
+            registerFeature("chatfilter", chatFilterListener);
         }
     }
 
@@ -71,6 +86,10 @@ public class FeatureManager {
 
     public BetterMending getBetterMending() {
         return getFeature("bettermending", BetterMending.class);
+    }
+
+    public ChatFilterListener getChatFilterListener() {
+        return getFeature("chatfilter", ChatFilterListener.class);
     }
 
     public void unregisterAll() {

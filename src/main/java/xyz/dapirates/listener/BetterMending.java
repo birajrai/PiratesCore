@@ -17,7 +17,7 @@ public class BetterMending implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemUse(PlayerInteractEvent e) {
         Player player = e.getPlayer();
-        if (!player.hasPermission("btm.use") ||
+        if (!player.hasPermission("pc.bettermending.use") ||
                 player.getGameMode() == GameMode.SPECTATOR ||
                 player.getGameMode() == GameMode.CREATIVE)
             return;
