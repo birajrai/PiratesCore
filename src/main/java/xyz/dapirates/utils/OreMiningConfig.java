@@ -15,26 +15,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class OreMiningConfig {
-    
+
     private final Core plugin;
     private final File configFile;
     private FileConfiguration config;
-    
+
     public OreMiningConfig(Core plugin) {
         this.plugin = plugin;
         this.configFile = new File(plugin.getDataFolder(), "oremining.yml");
         loadConfig();
     }
-    
+
     private void loadConfig() {
         if (!configFile.exists()) {
             plugin.saveResource("oremining.yml", false);
         }
-        
+
         config = YamlConfiguration.loadConfiguration(configFile);
         setupDefaults();
     }
-    
+
     private void setupDefaults() {
         // General settings
         config.addDefault("general.enabled", true);
@@ -43,52 +43,72 @@ public class OreMiningConfig {
         config.addDefault("general.whitelist-enabled", false);
         config.addDefault("general.tnt-mining-enabled", true);
         config.addDefault("general.message-format", "text"); // "text" or "embed"
-        
+
         // Height and light controls
         config.addDefault("controls.min-height", -64);
         config.addDefault("controls.max-height", 320);
         config.addDefault("controls.min-light-level", 0);
         config.addDefault("controls.max-light-level", 15);
-        
+
         // Time-based alerts
         config.addDefault("alerts.time-based.enabled", true);
         config.addDefault("alerts.time-based.timeframe-minutes", 5);
         config.addDefault("alerts.time-based.threshold", 10);
-        config.addDefault("alerts.time-based.message", "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
-        
+        config.addDefault("alerts.time-based.message",
+                "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
+
         // Whitelist
         config.addDefault("whitelist.players", Arrays.asList("admin1", "admin2"));
-        
+
         // Default tracked blocks
         setupDefaultBlocks();
-        
+
         config.options().copyDefaults(true);
         saveConfig();
     }
-    
+
     private void setupDefaultBlocks() {
         // Common ores
-        setupBlockDefaults(Material.DIAMOND_ORE, "§b[OreMining] §f{player} found §bDiamond Ore§f!", Sound.ENTITY_PLAYER_LEVELUP);
-        setupBlockDefaults(Material.DEEPSLATE_DIAMOND_ORE, "§b[OreMining] §f{player} found §bDeepslate Diamond Ore§f!", Sound.ENTITY_PLAYER_LEVELUP);
-        setupBlockDefaults(Material.EMERALD_ORE, "§a[OreMining] §f{player} found §aEmerald Ore§f!", Sound.ENTITY_PLAYER_LEVELUP);
-        setupBlockDefaults(Material.DEEPSLATE_EMERALD_ORE, "§a[OreMining] §f{player} found §aDeepslate Emerald Ore§f!", Sound.ENTITY_PLAYER_LEVELUP);
-        setupBlockDefaults(Material.GOLD_ORE, "§6[OreMining] §f{player} found §6Gold Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_GOLD_ORE, "§6[OreMining] §f{player} found §6Deepslate Gold Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.IRON_ORE, "§7[OreMining] §f{player} found §7Iron Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_IRON_ORE, "§7[OreMining] §f{player} found §7Deepslate Iron Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.COPPER_ORE, "§c[OreMining] §f{player} found §cCopper Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_COPPER_ORE, "§c[OreMining] §f{player} found §cDeepslate Copper Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.COAL_ORE, "§8[OreMining] §f{player} found §8Coal Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_COAL_ORE, "§8[OreMining] §f{player} found §8Deepslate Coal Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.REDSTONE_ORE, "§4[OreMining] §f{player} found §4Redstone Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_REDSTONE_ORE, "§4[OreMining] §f{player} found §4Deepslate Redstone Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.LAPIS_ORE, "§9[OreMining] §f{player} found §9Lapis Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.DEEPSLATE_LAPIS_ORE, "§9[OreMining] §f{player} found §9Deepslate Lapis Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.ANCIENT_DEBRIS, "§5[OreMining] §f{player} found §5Ancient Debris§f!", Sound.ENTITY_ENDER_DRAGON_GROWL);
-        setupBlockDefaults(Material.NETHER_GOLD_ORE, "§6[OreMining] §f{player} found §6Nether Gold Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
-        setupBlockDefaults(Material.NETHER_QUARTZ_ORE, "§f[OreMining] §f{player} found §fNether Quartz Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DIAMOND_ORE, "§b[OreMining] §f{player} found §bDiamond Ore§f!",
+                Sound.ENTITY_PLAYER_LEVELUP);
+        setupBlockDefaults(Material.DEEPSLATE_DIAMOND_ORE, "§b[OreMining] §f{player} found §bDeepslate Diamond Ore§f!",
+                Sound.ENTITY_PLAYER_LEVELUP);
+        setupBlockDefaults(Material.EMERALD_ORE, "§a[OreMining] §f{player} found §aEmerald Ore§f!",
+                Sound.ENTITY_PLAYER_LEVELUP);
+        setupBlockDefaults(Material.DEEPSLATE_EMERALD_ORE, "§a[OreMining] §f{player} found §aDeepslate Emerald Ore§f!",
+                Sound.ENTITY_PLAYER_LEVELUP);
+        setupBlockDefaults(Material.GOLD_ORE, "§6[OreMining] §f{player} found §6Gold Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_GOLD_ORE, "§6[OreMining] §f{player} found §6Deepslate Gold Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.IRON_ORE, "§7[OreMining] §f{player} found §7Iron Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_IRON_ORE, "§7[OreMining] §f{player} found §7Deepslate Iron Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.COPPER_ORE, "§c[OreMining] §f{player} found §cCopper Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_COPPER_ORE, "§c[OreMining] §f{player} found §cDeepslate Copper Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.COAL_ORE, "§8[OreMining] §f{player} found §8Coal Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_COAL_ORE, "§8[OreMining] §f{player} found §8Deepslate Coal Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.REDSTONE_ORE, "§4[OreMining] §f{player} found §4Redstone Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_REDSTONE_ORE,
+                "§4[OreMining] §f{player} found §4Deepslate Redstone Ore§f!", Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.LAPIS_ORE, "§9[OreMining] §f{player} found §9Lapis Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.DEEPSLATE_LAPIS_ORE, "§9[OreMining] §f{player} found §9Deepslate Lapis Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.ANCIENT_DEBRIS, "§5[OreMining] §f{player} found §5Ancient Debris§f!",
+                Sound.ENTITY_ENDER_DRAGON_GROWL);
+        setupBlockDefaults(Material.NETHER_GOLD_ORE, "§6[OreMining] §f{player} found §6Nether Gold Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
+        setupBlockDefaults(Material.NETHER_QUARTZ_ORE, "§f[OreMining] §f{player} found §fNether Quartz Ore§f!",
+                Sound.BLOCK_NOTE_BLOCK_PLING);
     }
-    
+
     private void setupBlockDefaults(Material material, String message, Sound sound) {
         String path = "blocks." + material.name().toLowerCase();
         config.addDefault(path + ".enabled", true);
@@ -97,7 +117,7 @@ public class OreMiningConfig {
         config.addDefault(path + ".show-coordinates", true);
         config.addDefault(path + ".commands", Arrays.asList());
     }
-    
+
     public void saveConfig() {
         try {
             config.save(configFile);
@@ -105,79 +125,79 @@ public class OreMiningConfig {
             plugin.getLogger().severe("Could not save oremining.yml: " + e.getMessage());
         }
     }
-    
+
     public void reloadConfig() {
         loadConfig();
     }
-    
+
     // General settings
     public boolean isEnabled() {
         return config.getBoolean("general.enabled", true);
     }
-    
+
     public boolean isConsoleNotificationsEnabled() {
         return config.getBoolean("general.console-notifications", true);
     }
-    
+
     public boolean isSelfNotificationsEnabled() {
         return config.getBoolean("general.self-notifications", true);
     }
-    
+
     public boolean isWhitelistEnabled() {
         return config.getBoolean("general.whitelist-enabled", false);
     }
-    
+
     public boolean isTNTMiningEnabled() {
         return config.getBoolean("general.tnt-mining-enabled", true);
     }
-    
+
     public String getMessageFormat() {
         return config.getString("general.message-format", "text");
     }
-    
+
     // Height and light controls
     public boolean isHeightAllowed(int y) {
         int minHeight = config.getInt("controls.min-height", -64);
         int maxHeight = config.getInt("controls.max-height", 320);
         return y >= minHeight && y <= maxHeight;
     }
-    
+
     public boolean isLightLevelAllowed(int lightLevel) {
         int minLight = config.getInt("controls.min-light-level", 0);
         int maxLight = config.getInt("controls.max-light-level", 15);
         return lightLevel >= minLight && lightLevel <= maxLight;
     }
-    
+
     // Time-based alerts
     public boolean isTimeBasedAlertsEnabled() {
         return config.getBoolean("alerts.time-based.enabled", true);
     }
-    
+
     public long getTimeBasedAlertTimeframe() {
         return config.getLong("alerts.time-based.timeframe-minutes", 5) * 60 * 1000; // Convert to milliseconds
     }
-    
+
     public int getTimeBasedAlertThreshold() {
         return config.getInt("alerts.time-based.threshold", 10);
     }
-    
+
     public String getTimeBasedAlertMessage(Player player, int count) {
-        String message = config.getString("alerts.time-based.message", 
-            "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
-        
+        String message = config.getString("alerts.time-based.message",
+                "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
+
         long timeframeMinutes = getTimeBasedAlertTimeframe() / (60 * 1000);
-        
+
         return message
-            .replace("{player}", player.getName())
-            .replace("{count}", String.valueOf(count))
-            .replace("{timeframe}", String.valueOf(timeframeMinutes));
+                .replace("{player}", player.getName())
+                .replace("{count}", String.valueOf(count))
+                .replace("{timeframe}", String.valueOf(timeframeMinutes));
     }
-    
+
     // Whitelist
     public List<String> getWhitelistedPlayers() {
         return config.getStringList("whitelist.players");
     }
-    
+
     public void addWhitelistedPlayer(String playerName) {
         List<String> whitelist = getWhitelistedPlayers();
         if (!whitelist.contains(playerName)) {
@@ -186,71 +206,71 @@ public class OreMiningConfig {
             saveConfig();
         }
     }
-    
+
     public void removeWhitelistedPlayer(String playerName) {
         List<String> whitelist = getWhitelistedPlayers();
         whitelist.remove(playerName);
         config.set("whitelist.players", whitelist);
         saveConfig();
     }
-    
+
     // Block tracking
     public boolean isBlockTracked(Material material) {
         String path = "blocks." + material.name().toLowerCase();
         return config.getBoolean(path + ".enabled", false);
     }
-    
+
     public String getCustomMessage(Material material, Player player, org.bukkit.Location location, boolean isTNT) {
         String path = "blocks." + material.name().toLowerCase();
         String message = config.getString(path + ".message", "§a[OreMining] §f{player} found {block}!");
-        
+
         boolean showCoords = config.getBoolean(path + ".show-coordinates", true);
-        
+
         message = message
-            .replace("{player}", player.getName())
-            .replace("{block}", material.name().replace("_", " "))
-            .replace("{world}", location.getWorld().getName());
-        
+                .replace("{player}", player.getName())
+                .replace("{block}", material.name().replace("_", " "))
+                .replace("{world}", location.getWorld().getName());
+
         if (showCoords) {
             message = message
-                .replace("{x}", String.valueOf(location.getBlockX()))
-                .replace("{y}", String.valueOf(location.getBlockY()))
-                .replace("{z}", String.valueOf(location.getBlockZ()));
+                    .replace("{x}", String.valueOf(location.getBlockX()))
+                    .replace("{y}", String.valueOf(location.getBlockY()))
+                    .replace("{z}", String.valueOf(location.getBlockZ()));
         } else {
             message = message
-                .replace("{x}", "***")
-                .replace("{y}", "***")
-                .replace("{z}", "***");
+                    .replace("{x}", "***")
+                    .replace("{y}", "***")
+                    .replace("{z}", "***");
         }
-        
+
         if (isTNT) {
             message = message.replace("found", "found (TNT)");
         }
-        
+
         return message;
     }
-    
+
     public Sound getCustomSound(Material material) {
         String path = "blocks." + material.name().toLowerCase();
         String soundName = config.getString(path + ".sound", "BLOCK_NOTE_BLOCK_PLING");
-        
+
         try {
             return Sound.valueOf(soundName);
         } catch (IllegalArgumentException e) {
             return Sound.BLOCK_NOTE_BLOCK_PLING;
         }
     }
-    
+
     public List<String> getCustomCommands(Material material) {
         String path = "blocks." + material.name().toLowerCase();
         return config.getStringList(path + ".commands");
     }
-    
+
     public boolean isShowCoordinates(Material material) {
         String path = "blocks." + material.name().toLowerCase();
         return config.getBoolean(path + ".show-coordinates", true);
     }
-    
+
     // Block management
     public void addTrackedBlock(Material material, String message, Sound sound, boolean showCoords) {
         String path = "blocks." + material.name().toLowerCase();
@@ -261,22 +281,22 @@ public class OreMiningConfig {
         config.set(path + ".commands", Arrays.asList());
         saveConfig();
     }
-    
+
     public void removeTrackedBlock(Material material) {
         String path = "blocks." + material.name().toLowerCase();
         config.set(path, null);
         saveConfig();
     }
-    
+
     public Set<Material> getTrackedBlocks() {
         ConfigurationSection blocksSection = config.getConfigurationSection("blocks");
         if (blocksSection == null) {
             return new HashSet<>();
         }
-        
+
         return blocksSection.getKeys(false).stream()
-            .filter(key -> config.getBoolean("blocks." + key + ".enabled", false))
-            .map(Material::valueOf)
-            .collect(Collectors.toSet());
+                .filter(key -> config.getBoolean("blocks." + key + ".enabled", false))
+                .map(Material::valueOf)
+                .collect(Collectors.toSet());
     }
-} 
+}
