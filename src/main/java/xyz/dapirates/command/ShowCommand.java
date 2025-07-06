@@ -6,7 +6,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
-import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,10 +30,26 @@ public class ShowCommand implements CommandExecutor {
         // Get the item's display name component (preserves exact formatting and color)
         Component itemComponent = item.displayName();
 
-        // Add quantity if more than 1 item
+        // Add quantity if more than 1 item (inside the brackets)
         int quantity = item.getAmount();
         if (quantity > 1) {
             itemComponent = itemComponent.append(Component.text(" x" + quantity, NamedTextColor.GRAY));
+        }
+
+        // Wrap the entire item component (including quantity) in brackets
+        itemComponent = Component.text("[", NamedTextColor.WHITE)
+                .append(itemComponent)
+                .append(Component.text("]", NamedTextColor.WHITE));
+
+        // Add lore information if available
+        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+            String loreInfo = item.getItemMeta().getLore().get(0); // Get first lore line
+            if (loreInfo != null && !loreInfo.isEmpty()) {
+                // Convert lore color codes to component
+                Component loreComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(loreInfo);
+                itemComponent = itemComponent.append(Component.text(" shows ", NamedTextColor.WHITE))
+                        .append(loreComponent);
+            }
         }
 
         // Add hover event to show item details
@@ -57,9 +72,8 @@ public class ShowCommand implements CommandExecutor {
         }
 
         // Create message with prefix and item
-        Component message = Component.text(player.getName() + " shows you the item [", NamedTextColor.GREEN)
-                .append(itemComponent)
-                .append(Component.text("]", NamedTextColor.GREEN));
+        Component message = Component.text(player.getName() + " is holding ", NamedTextColor.WHITE)
+                .append(itemComponent);
 
         // Insert prefix at the beginning
         if (!playerPrefixComponent.equals(Component.empty())) {
