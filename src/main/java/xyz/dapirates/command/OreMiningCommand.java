@@ -13,8 +13,12 @@ import xyz.dapirates.data.OreMiningStats;
 import xyz.dapirates.features.OreMiningNotifier;
 import xyz.dapirates.utils.OreMiningConfig;
 
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.LinkedList;
 
 public class OreMiningCommand implements CommandExecutor, TabCompleter {
     
@@ -229,8 +233,42 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             // This would require access to the logger, but for now we'll just acknowledge
             sender.sendMessage("§a[OreMining] §fLogs cleared.");
         } else {
-            // Show log file location
-            sender.sendMessage("§a[OreMining] §fLogs are stored in: plugins/PiratesAddons/oremining.log");
+            // Show last 20 lines of log file
+            File logFile = new File(plugin.getDataFolder(), "oremining.log");
+            if (!logFile.exists()) {
+                sender.sendMessage("§c[OreMining] No log file found.");
+                return;
+            }
+            try (RandomAccessFile raf = new RandomAccessFile(logFile, "r")) {
+                LinkedList<String> lines = new LinkedList<>();
+                long fileLength = raf.length();
+                long pos = fileLength - 1;
+                int lineCount = 0;
+                StringBuilder sb = new StringBuilder();
+                while (pos >= 0 && lineCount < 20) {
+                    raf.seek(pos);
+                    char c = (char) raf.read();
+                    if (c == '\n') {
+                        if (sb.length() > 0) {
+                            lines.addFirst(sb.reverse().toString());
+                            sb.setLength(0);
+                            lineCount++;
+                        }
+                    } else {
+                        sb.append(c);
+                    }
+                    pos--;
+                }
+                if (sb.length() > 0 && lineCount < 20) {
+                    lines.addFirst(sb.reverse().toString());
+                }
+                sender.sendMessage("§a=== OreMining Log (last 20 lines) ===");
+                for (String line : lines) {
+                    sender.sendMessage("§7" + line);
+                }
+            } catch (Exception e) {
+                sender.sendMessage("§c[OreMining] Error reading log file: " + e.getMessage());
+            }
         }
     }
     
