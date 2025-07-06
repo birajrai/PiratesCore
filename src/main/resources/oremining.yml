@@ -17,7 +17,7 @@ general:
   # Enable TNT mining detection
   tnt-mining-enabled: true
   
-  # Message format: "text" or "embed" (for future Discord integration)
+  # Message format: "text" or "json" (for rich text with clickable elements)
   message-format: "text"
 
 # Height and light level controls

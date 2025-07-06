@@ -37,7 +37,10 @@ By default, the system tracks:
 - **Height control system** - Only track blocks within specified Y coordinates
 - **Light level control** - Only track blocks within specified light levels
 - **Custom command execution** - Run commands when specific blocks are mined
-- **Embed message support** - Future Discord integration ready
+- **JSON message support** - Rich text with clickable coordinates and hover effects
+- **Asynchronous processing** - Database operations and notifications run async to prevent server lag
+- **H2 database storage** - Persistent data storage with caching for performance
+- **PlaceholderAPI support** - Use any PlaceholderAPI placeholders in messages
 - **Player toggle system** - Players can disable notifications for themselves
 - **Admin controls** - Comprehensive admin commands for management
 
@@ -60,7 +63,7 @@ general:
   self-notifications: true         # Allow self-notifications
   whitelist-enabled: false         # Enable whitelist system
   tnt-mining-enabled: true         # Enable TNT mining detection
-  message-format: "text"           # Message format (text/embed)
+  message-format: "text"           # Message format (text/json)
 ```
 
 ### Height and Light Controls
@@ -125,6 +128,14 @@ The following placeholders can be used in messages and commands:
 - `{x}`, `{y}`, `{z}` - Coordinates
 - `{world}` - World name
 
+### PlaceholderAPI Support
+
+If PlaceholderAPI is installed, you can use any PlaceholderAPI placeholders in your messages:
+- `%player_name%` - Player name
+- `%player_health%` - Player health
+- `%player_level%` - Player level
+- And many more...
+
 ## Custom Commands
 
 You can configure custom commands to execute when specific blocks are mined:
@@ -144,6 +155,25 @@ diamond_ore:
 ## Logging
 
 The plugin logs all mining activities to `plugins/PiratesAddons/oremining.log` with timestamps and detailed information.
+
+## Database
+
+The plugin uses H2 database for persistent storage of:
+- Player statistics
+- Block counts
+- Mining history
+- All data is cached in memory for fast access
+
+Database files are stored in `plugins/PiratesAddons/oremining.mv.db`
+
+**Note:** The H2 database driver is bundled with the plugin, so no additional setup is required. If the H2 database is not available for any reason, the plugin will fall back to in-memory storage. Data will be lost on server restart in this case, but the plugin will continue to function normally.
+
+## Performance
+
+- **Asynchronous processing** - Database operations and notifications run on separate threads
+- **Memory caching** - Frequently accessed data is cached in memory
+- **Optimized queries** - Database queries are optimized for performance
+- **Non-blocking operations** - All heavy operations are async to prevent server lag
 
 ## API Version
 

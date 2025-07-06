@@ -7,6 +7,9 @@ prefix: PiratesAddons
 description: A small quality of life tweak to the Mending enchantment and ore mining notifications. Only supports PaperMC 1.21.7
 api-version: 1.21
 
+# Soft dependencies (optional)
+softdepend: [PlaceholderAPI]
+
 commands:
   show:
     description: Show the item you are holding in chat

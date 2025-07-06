@@ -18,15 +18,20 @@ import xyz.dapirates.data.OreMiningData;
 import xyz.dapirates.data.OreMiningStats;
 import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.utils.OreMiningLogger;
+import xyz.dapirates.managers.DatabaseManager;
+import xyz.dapirates.managers.MessageManager;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
 
 public class OreMiningNotifier implements Listener {
     
     private final Core plugin;
     private final OreMiningConfig config;
     private final OreMiningLogger logger;
+    private final DatabaseManager databaseManager;
+    private final MessageManager messageManager;
     private final Map<UUID, OreMiningStats> playerStats;
     private final Map<UUID, Long> lastMiningTime;
     private final Set<UUID> whitelistedPlayers;
@@ -36,6 +41,8 @@ public class OreMiningNotifier implements Listener {
         this.plugin = plugin;
         this.config = new OreMiningConfig(plugin);
         this.logger = new OreMiningLogger(plugin);
+        this.databaseManager = plugin.getDatabaseManager();
+        this.messageManager = plugin.getMessageManager();
         this.playerStats = new ConcurrentHashMap<>();
         this.lastMiningTime = new ConcurrentHashMap<>();
         this.whitelistedPlayers = new HashSet<>();
@@ -138,6 +145,15 @@ public class OreMiningNotifier implements Listener {
         long currentTime = System.currentTimeMillis();
         lastMiningTime.put(playerId, currentTime);
         
+        // Save to database asynchronously
+        databaseManager.savePlayerStatsAsync(stats).thenRun(() -> {
+            databaseManager.updateCache(playerId, stats);
+        });
+        
+        // Add mining entry to database asynchronously
+        databaseManager.addMiningEntryAsync(playerId, material, location.getWorld().getName(), 
+            location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
+        
         // Check for time-based alerts
         checkTimeBasedAlerts(player, stats, currentTime);
     }
@@ -152,10 +168,11 @@ public class OreMiningNotifier implements Listener {
         
         // Send to console if enabled
         if (config.isConsoleNotificationsEnabled()) {
-            Bukkit.getConsoleSender().sendMessage(message);
+            messageManager.sendConsoleMessage(message);
         }
         
-        // Send to all players with permission
+        // Collect players to notify
+        List<Player> playersToNotify = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.hasPermission("pc.ores.notify") && !toggledOffPlayers.contains(player.getUniqueId())) {
                 // Check whitelist if enabled
@@ -168,14 +185,23 @@ public class OreMiningNotifier implements Listener {
                     continue;
                 }
                 
-                player.sendMessage(message);
-                
-                // Play sound
-                if (sound != null) {
-                    player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
-                }
+                playersToNotify.add(player);
             }
         }
+        
+        // Send messages asynchronously
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            messageManager.broadcastMessage(playersToNotify, message, material, location, isTNT);
+            
+            // Play sounds on main thread
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                for (Player player : playersToNotify) {
+                    if (sound != null) {
+                        player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+                    }
+                }
+            });
+        });
     }
     
     private void executeCustomCommands(Player player, Material material, Location location) {
@@ -272,15 +298,49 @@ public class OreMiningNotifier implements Listener {
         player.sendMessage("§a[OreMining] §fRemoved from whitelist.");
     }
     
+    public CompletableFuture<List<OreMiningStats>> getTopPlayersAsync(int limit) {
+        if (!databaseManager.isDatabaseAvailable()) {
+            // Fallback to in-memory stats
+            return CompletableFuture.completedFuture(
+                playerStats.values().stream()
+                    .sorted(Comparator.comparingInt(OreMiningStats::getTotalBlocks).reversed())
+                    .limit(limit)
+                    .toList()
+            );
+        }
+        return databaseManager.getTopPlayersAsync(limit);
+    }
+    
     public List<OreMiningStats> getTopPlayers(int limit) {
-        return playerStats.values().stream()
-            .sorted(Comparator.comparingInt(OreMiningStats::getTotalBlocks).reversed())
-            .limit(limit)
-            .toList();
+        try {
+            return getTopPlayersAsync(limit).get();
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to get top players: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
     
     public OreMiningStats getPlayerStats(UUID playerId) {
-        return playerStats.get(playerId);
+        // Try cache first
+        OreMiningStats stats = playerStats.get(playerId);
+        if (stats != null) {
+            return stats;
+        }
+        
+        // Try database if available
+        if (databaseManager.isDatabaseAvailable()) {
+            try {
+                stats = databaseManager.loadPlayerStatsAsync(playerId).get();
+                if (stats != null) {
+                    playerStats.put(playerId, stats);
+                    return stats;
+                }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to load player stats from database: " + e.getMessage());
+            }
+        }
+        
+        return null;
     }
     
     public Map<Material, Integer> getPlayerBlockStats(UUID playerId) {
@@ -291,11 +351,13 @@ public class OreMiningNotifier implements Listener {
     public void clearPlayerStats(UUID playerId) {
         playerStats.remove(playerId);
         lastMiningTime.remove(playerId);
+        databaseManager.clearPlayerStatsAsync(playerId);
     }
     
     public void clearAllStats() {
         playerStats.clear();
         lastMiningTime.clear();
+        databaseManager.clearAllStatsAsync();
     }
     
     public boolean isPlayerWhitelisted(UUID playerId) {
