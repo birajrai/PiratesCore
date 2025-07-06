@@ -1,0 +1,1 @@
+ rm -rf ~/Documents/Testing\ Server/plugins/piratesaddons-1.0.jar && mvn clean package && mv target/piratesaddons-1.0.jar ~/Documents/Testing\ Server/plugins/piratesaddons-1.0.jar
