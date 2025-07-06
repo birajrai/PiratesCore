@@ -199,6 +199,20 @@ public class DatabaseManager {
         });
     }
 
+    public CompletableFuture<Void> saveOreMiningSessionAsync(UUID playerId, Map<Material, Integer> minedBlocks) {
+        if (!databaseAvailable) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return CompletableFuture.runAsync(() -> {
+            try (Connection conn = DriverManager.getConnection(dbUrl)) {
+                saveOreMiningSession(conn, playerId, minedBlocks);
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to save ore mining session", e);
+            }
+        });
+    }
+
     // Synchronous database operations
     private void savePlayerStats(Connection conn, OreMiningStats stats) throws SQLException {
         // Insert or update player stats
@@ -318,6 +332,40 @@ public class DatabaseManager {
             stmt.execute("DELETE FROM mining_history");
             stmt.execute("DELETE FROM block_counts");
             stmt.execute("DELETE FROM player_stats");
+        }
+    }
+
+    private void saveOreMiningSession(Connection conn, UUID playerId, Map<Material, Integer> minedBlocks) throws SQLException {
+        // Create or update player stats entry
+        String upsertPlayer = """
+                MERGE INTO player_stats (player_uuid, player_name, total_blocks, last_updated)
+                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+                """;
+
+        int totalBlocks = minedBlocks.values().stream().mapToInt(Integer::intValue).sum();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(upsertPlayer)) {
+            pstmt.setString(1, playerId.toString());
+            pstmt.setString(2, getPlayerName(playerId));
+            pstmt.setInt(3, totalBlocks);
+            pstmt.executeUpdate();
+        }
+
+        // Update block counts for this session
+        String deleteBlockCounts = "DELETE FROM block_counts WHERE player_uuid = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(deleteBlockCounts)) {
+            pstmt.setString(1, playerId.toString());
+            pstmt.executeUpdate();
+        }
+
+        String insertBlockCount = "INSERT INTO block_counts (player_uuid, material, count) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(insertBlockCount)) {
+            for (Map.Entry<Material, Integer> entry : minedBlocks.entrySet()) {
+                pstmt.setString(1, playerId.toString());
+                pstmt.setString(2, entry.getKey().name());
+                pstmt.setInt(3, entry.getValue());
+                pstmt.executeUpdate();
+            }
         }
     }
 

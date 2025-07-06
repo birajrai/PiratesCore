@@ -42,29 +42,19 @@ public class Core extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Flush all player stats and mining sessions to the database before shutdown
+        // Flush all mining sessions to the database before shutdown
         if (oreMiningNotifier != null && databaseManager != null && databaseManager.isDatabaseAvailable()) {
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            // Flush all active mining sessions to stats
+            // Flush all active mining sessions to database asynchronously
             oreMiningNotifier.flushAllMiningSessionsToStats();
-            // Save stats for all players in memory
-            for (UUID playerId : oreMiningNotifier.getAllPlayerIds()) {
-                var stats = oreMiningNotifier.getPlayerStats(playerId);
-                if (stats != null) {
-                    futures.add(databaseManager.savePlayerStatsAsync(stats));
-                }
+            
+            // Give a small delay to allow async operations to complete
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
-            // Also save stats for all online players (in case not in map)
-            for (var player : getServer().getOnlinePlayers()) {
-                var stats = oreMiningNotifier.getPlayerStats(player.getUniqueId());
-                if (stats != null) {
-                    futures.add(databaseManager.savePlayerStatsAsync(stats));
-                }
-            }
-            // Wait for all saves to complete (with timeout)
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .orTimeout(5, java.util.concurrent.TimeUnit.SECONDS).exceptionally(e -> null).join();
         }
+        
         if (databaseManager != null) {
             databaseManager.close();
         }
@@ -101,8 +91,5 @@ public class Core extends JavaPlugin {
         return messageManager;
     }
 
-    // Add this method to expose all player IDs for flushing
-    public List<UUID> getAllPlayerIds() {
-        return new ArrayList<>(oreMiningNotifier.getAllPlayerIds());
-    }
+
 }

@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import xyz.dapirates.Core;
-import xyz.dapirates.data.OreMiningStats;
 import xyz.dapirates.data.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.managers.DatabaseManager;
@@ -97,8 +96,7 @@ public class OreMiningNotifier implements Listener {
             // Find the nearest player for TNT mining attribution
             Player nearestPlayer = findNearestPlayer(block.getLocation());
             if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify")) {
-                updatePlayerStats(nearestPlayer, material, block.getLocation());
-                sendOreMiningNotification(nearestPlayer, material, block.getLocation(), true);
+                handleDelayedNotification(nearestPlayer, material, block.getLocation());
             }
         }
     }
@@ -119,29 +117,6 @@ public class OreMiningNotifier implements Listener {
         MiningSession session = miningSessions.remove(playerId);
         if (session != null && session.hasMinedBlocks()) {
             saveSessionAsync(playerId, session);
-        }
-    }
-
-    private void updatePlayerStats(Player player, Material material, Location location) {
-        UUID playerId = player.getUniqueId();
-        OreMiningStats stats = playerStats.computeIfAbsent(playerId, OreMiningStats::new);
-
-        // Update block count
-        stats.addBlock(material);
-
-        // Update time-based stats
-        long currentTime = System.currentTimeMillis();
-        lastMiningTime.put(playerId, currentTime);
-
-        // Save to database asynchronously if available
-        if (databaseManager != null) {
-            databaseManager.savePlayerStatsAsync(stats).thenRun(() -> {
-                databaseManager.updateCache(playerId, stats);
-            });
-
-            // Add mining entry to database asynchronously
-            databaseManager.addMiningEntryAsync(playerId, material, location.getWorld().getName(),
-                    location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
         }
     }
 
@@ -384,7 +359,7 @@ public class OreMiningNotifier implements Listener {
 
     private void sendWelcomeMessage(Player player) {
         player.sendMessage("§a[OreMining] §fWelcome! You have ore mining notifications enabled.");
-        player.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear, logs");
+        player.sendMessage("§7Available commands: toggle, reload, stats, top, whitelist, clear");
     }
 
     private void loadWhitelistedPlayers() {
@@ -423,81 +398,12 @@ public class OreMiningNotifier implements Listener {
         player.sendMessage("§a[OreMining] §fRemoved from whitelist.");
     }
 
-    public CompletableFuture<List<OreMiningStats>> getTopPlayersAsync(int limit) {
-        if (databaseManager == null || !databaseManager.isDatabaseAvailable()) {
-            // Fallback to in-memory stats
-            return CompletableFuture.completedFuture(
-                    playerStats.values().stream()
-                            .sorted(Comparator.comparingInt(OreMiningStats::getTotalBlocks).reversed())
-                            .limit(limit)
-                            .toList());
-        }
-        return databaseManager.getTopPlayersAsync(limit);
-    }
-
-    public List<OreMiningStats> getTopPlayers(int limit) {
-        try {
-            return getTopPlayersAsync(limit).get();
-        } catch (Exception e) {
-            plugin.getLogger().warning("Failed to get top players: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    public OreMiningStats getPlayerStats(UUID playerId) {
-        // Try cache first
-        OreMiningStats stats = playerStats.get(playerId);
-        if (stats != null) {
-            return stats;
-        }
-
-        // Try database if available
-        if (databaseManager != null && databaseManager.isDatabaseAvailable()) {
-            try {
-                stats = databaseManager.loadPlayerStatsAsync(playerId).get();
-                if (stats != null) {
-                    playerStats.put(playerId, stats);
-                    return stats;
-                }
-            } catch (Exception e) {
-                plugin.getLogger().warning("Failed to load player stats from database: " + e.getMessage());
-            }
-        }
-
-        return null;
-    }
-
-    public Map<Material, Integer> getPlayerBlockStats(UUID playerId) {
-        OreMiningStats stats = playerStats.get(playerId);
-        return stats != null ? stats.getBlockCounts() : new HashMap<>();
-    }
-
-    public void clearPlayerStats(UUID playerId) {
-        playerStats.remove(playerId);
-        lastMiningTime.remove(playerId);
-        if (databaseManager != null) {
-            databaseManager.clearPlayerStatsAsync(playerId);
-        }
-    }
-
-    public void clearAllStats() {
-        playerStats.clear();
-        lastMiningTime.clear();
-        if (databaseManager != null) {
-            databaseManager.clearAllStatsAsync();
-        }
-    }
-
     public boolean isPlayerWhitelisted(UUID playerId) {
         return whitelistedPlayers.contains(playerId);
     }
 
     public boolean isPlayerToggledOff(UUID playerId) {
         return toggledOffPlayers.contains(playerId);
-    }
-
-    public Set<UUID> getAllPlayerIds() {
-        return playerStats.keySet();
     }
 
     public void flushAllMiningSessionsToStats() {
@@ -514,6 +420,8 @@ public class OreMiningNotifier implements Listener {
 
     private void saveSessionAsync(UUID playerId, MiningSession session) {
         // Save the session data to H2 asynchronously
-        databaseManager.saveOreMiningSessionAsync(playerId, session.getMinedBlocks());
+        if (databaseManager != null && databaseManager.isDatabaseAvailable()) {
+            databaseManager.saveOreMiningSessionAsync(playerId, session.getMinedBlocks());
+        }
     }
 }
