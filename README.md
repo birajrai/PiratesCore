@@ -37,6 +37,7 @@ By default, the system tracks:
 - **Height control system** - Only track blocks within specified Y coordinates
 - **Light level control** - Only track blocks within specified light levels
 - **Custom command execution** - Run commands when specific blocks are mined
+- **Delayed notifications** - Batch mining notifications to reduce spam
 - **JSON message support** - Rich text with clickable coordinates and hover effects
 - **Asynchronous processing** - Database operations and notifications run async to prevent server lag
 - **H2 database storage** - Persistent data storage with caching for performance
@@ -64,6 +65,12 @@ general:
   whitelist-enabled: false         # Enable whitelist system
   tnt-mining-enabled: true         # Enable TNT mining detection
   message-format: "text"           # Message format (text/json)
+  
+  # Delayed notification settings
+  delayed-notifications:
+    enabled: true                  # Enable delayed notifications
+    delay-seconds: 30              # Wait time before sending notification
+    batch-messages: true           # Combine multiple blocks into one message
 ```
 
 ### Height and Light Controls
