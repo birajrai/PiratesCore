@@ -1,0 +1,5 @@
+# settings.yml
+# Enable or disable plugin features here
+features:
+  BetterMending: true
+  OreMining: true 

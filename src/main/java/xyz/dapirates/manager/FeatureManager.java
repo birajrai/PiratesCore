@@ -3,6 +3,8 @@ package xyz.dapirates.manager;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.dapirates.listener.BetterMending;
 import xyz.dapirates.listener.OreMiningListener;
+import org.bukkit.configuration.file.YamlConfiguration;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -11,19 +13,38 @@ public class FeatureManager {
 
     private final JavaPlugin plugin;
     private final Map<String, Object> features;
+    private YamlConfiguration settingsConfig;
 
     public FeatureManager(JavaPlugin plugin) {
         this.plugin = plugin;
         this.features = new HashMap<>();
     }
 
-    public void registerFeatures() {
-        // Register features using a more abstract approach
-        registerFeature("bettermending", BetterMending::new);
+    private void loadSettings() {
+        File settingsFile = new File(plugin.getDataFolder(), "settings.yml");
+        if (!settingsFile.exists()) {
+            plugin.saveResource("settings.yml", false);
+        }
+        settingsConfig = YamlConfiguration.loadConfiguration(settingsFile);
+    }
 
+    public boolean isFeatureEnabled(String featureName) {
+        if (settingsConfig == null)
+            loadSettings();
+        return settingsConfig.getBoolean("features." + featureName, true);
+    }
+
+    public void registerFeatures() {
+        loadSettings();
+        // Register features using a more abstract approach
+        if (isFeatureEnabled("BetterMending")) {
+            registerFeature("bettermending", BetterMending::new);
+        }
         // Register ore mining feature (already initialized in Core)
-        OreMiningListener oreMiningListener = ((xyz.dapirates.core.Core) plugin).getOreMiningListener();
-        registerFeature("oremining", oreMiningListener);
+        if (isFeatureEnabled("OreMining")) {
+            OreMiningListener oreMiningListener = ((xyz.dapirates.core.Core) plugin).getOreMiningListener();
+            registerFeature("oremining", oreMiningListener);
+        }
     }
 
     private void registerFeature(String name, Object feature) {
