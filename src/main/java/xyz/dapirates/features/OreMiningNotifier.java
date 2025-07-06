@@ -1,0 +1,308 @@
+package xyz.dapirates.features;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import xyz.dapirates.Core;
+import xyz.dapirates.data.OreMiningData;
+import xyz.dapirates.data.OreMiningStats;
+import xyz.dapirates.utils.OreMiningConfig;
+import xyz.dapirates.utils.OreMiningLogger;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class OreMiningNotifier implements Listener {
+    
+    private final Core plugin;
+    private final OreMiningConfig config;
+    private final OreMiningLogger logger;
+    private final Map<UUID, OreMiningStats> playerStats;
+    private final Map<UUID, Long> lastMiningTime;
+    private final Set<UUID> whitelistedPlayers;
+    private final Set<UUID> toggledOffPlayers;
+    
+    public OreMiningNotifier(Core plugin) {
+        this.plugin = plugin;
+        this.config = new OreMiningConfig(plugin);
+        this.logger = new OreMiningLogger(plugin);
+        this.playerStats = new ConcurrentHashMap<>();
+        this.lastMiningTime = new ConcurrentHashMap<>();
+        this.whitelistedPlayers = new HashSet<>();
+        this.toggledOffPlayers = new HashSet<>();
+        
+        // Load whitelisted players from config
+        loadWhitelistedPlayers();
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+        Material material = block.getType();
+        
+        // Check if player has permission
+        if (!player.hasPermission("pc.ores.notify")) {
+            return;
+        }
+        
+        // Check if player has toggled off notifications
+        if (toggledOffPlayers.contains(player.getUniqueId())) {
+            return;
+        }
+        
+        // Check if block is configured for notifications
+        if (!config.isBlockTracked(material)) {
+            return;
+        }
+        
+        // Check height restrictions
+        if (!config.isHeightAllowed(block.getY())) {
+            return;
+        }
+        
+        // Check light level restrictions
+        if (!config.isLightLevelAllowed(block.getLightLevel())) {
+            return;
+        }
+        
+        // Update player stats
+        updatePlayerStats(player, material, block.getLocation());
+        
+        // Send notifications
+        sendOreMiningNotification(player, material, block.getLocation());
+        
+        // Execute custom commands
+        executeCustomCommands(player, material, block.getLocation());
+        
+        // Log the mining activity
+        logger.logMiningActivity(player, material, block.getLocation());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        if (!config.isTNTMiningEnabled()) {
+            return;
+        }
+        
+        for (Block block : event.blockList()) {
+            Material material = block.getType();
+            
+            if (!config.isBlockTracked(material)) {
+                continue;
+            }
+            
+            // Find the nearest player for TNT mining attribution
+            Player nearestPlayer = findNearestPlayer(block.getLocation());
+            if (nearestPlayer != null && nearestPlayer.hasPermission("pc.ores.notify")) {
+                updatePlayerStats(nearestPlayer, material, block.getLocation());
+                sendOreMiningNotification(nearestPlayer, material, block.getLocation(), true);
+                logger.logMiningActivity(nearestPlayer, material, block.getLocation(), true);
+            }
+        }
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        
+        // Initialize player stats if not exists
+        if (!playerStats.containsKey(player.getUniqueId())) {
+            playerStats.put(player.getUniqueId(), new OreMiningStats(player.getUniqueId()));
+        }
+        
+        // Send welcome message if player has permission
+        if (player.hasPermission("pc.ores.notify")) {
+            sendWelcomeMessage(player);
+        }
+    }
+    
+    private void updatePlayerStats(Player player, Material material, Location location) {
+        UUID playerId = player.getUniqueId();
+        OreMiningStats stats = playerStats.computeIfAbsent(playerId, OreMiningStats::new);
+        
+        // Update block count
+        stats.addBlock(material);
+        
+        // Update time-based stats
+        long currentTime = System.currentTimeMillis();
+        lastMiningTime.put(playerId, currentTime);
+        
+        // Check for time-based alerts
+        checkTimeBasedAlerts(player, stats, currentTime);
+    }
+    
+    private void sendOreMiningNotification(Player miner, Material material, Location location) {
+        sendOreMiningNotification(miner, material, location, false);
+    }
+    
+    private void sendOreMiningNotification(Player miner, Material material, Location location, boolean isTNT) {
+        String message = config.getCustomMessage(material, miner, location, isTNT);
+        Sound sound = config.getCustomSound(material);
+        
+        // Send to console if enabled
+        if (config.isConsoleNotificationsEnabled()) {
+            Bukkit.getConsoleSender().sendMessage(message);
+        }
+        
+        // Send to all players with permission
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission("pc.ores.notify") && !toggledOffPlayers.contains(player.getUniqueId())) {
+                // Check whitelist if enabled
+                if (config.isWhitelistEnabled() && !whitelistedPlayers.contains(player.getUniqueId())) {
+                    continue;
+                }
+                
+                // Don't send to self if self-notifications are disabled
+                if (player.equals(miner) && !config.isSelfNotificationsEnabled()) {
+                    continue;
+                }
+                
+                player.sendMessage(message);
+                
+                // Play sound
+                if (sound != null) {
+                    player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+                }
+            }
+        }
+    }
+    
+    private void executeCustomCommands(Player player, Material material, Location location) {
+        List<String> commands = config.getCustomCommands(material);
+        
+        for (String command : commands) {
+            String processedCommand = command
+                .replace("{player}", player.getName())
+                .replace("{block}", material.name())
+                .replace("{x}", String.valueOf(location.getBlockX()))
+                .replace("{y}", String.valueOf(location.getBlockY()))
+                .replace("{z}", String.valueOf(location.getBlockZ()))
+                .replace("{world}", location.getWorld().getName());
+            
+            if (processedCommand.startsWith("/")) {
+                processedCommand = processedCommand.substring(1);
+            }
+            
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
+        }
+    }
+    
+    private void checkTimeBasedAlerts(Player player, OreMiningStats stats, long currentTime) {
+        int blocksInTimeframe = stats.getBlocksInTimeframe(currentTime, config.getTimeBasedAlertTimeframe());
+        
+        if (blocksInTimeframe >= config.getTimeBasedAlertThreshold()) {
+            String alertMessage = config.getTimeBasedAlertMessage(player, blocksInTimeframe);
+            
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.hasPermission("pc.ores.notify.admin")) {
+                    onlinePlayer.sendMessage(alertMessage);
+                }
+            }
+            
+            if (config.isConsoleNotificationsEnabled()) {
+                Bukkit.getConsoleSender().sendMessage(alertMessage);
+            }
+        }
+    }
+    
+    private Player findNearestPlayer(Location location) {
+        Player nearestPlayer = null;
+        double nearestDistance = Double.MAX_VALUE;
+        
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            double distance = player.getLocation().distance(location);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestPlayer = player;
+            }
+        }
+        
+        return nearestPlayer;
+    }
+    
+    private void sendWelcomeMessage(Player player) {
+        player.sendMessage("§a[OreMining] §fWelcome! You have ore mining notifications enabled.");
+        player.sendMessage("§7Use §f/oremining help §7for available commands.");
+    }
+    
+    private void loadWhitelistedPlayers() {
+        List<String> whitelistedNames = config.getWhitelistedPlayers();
+        for (String name : whitelistedNames) {
+            // Try to get UUID from name (this is a simplified approach)
+            // In a real implementation, you might want to use a UUID cache or database
+            Player player = Bukkit.getPlayer(name);
+            if (player != null) {
+                whitelistedPlayers.add(player.getUniqueId());
+            }
+        }
+    }
+    
+    // Public methods for commands
+    public void toggleNotifications(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (toggledOffPlayers.contains(playerId)) {
+            toggledOffPlayers.remove(playerId);
+            player.sendMessage("§a[OreMining] §fNotifications enabled.");
+        } else {
+            toggledOffPlayers.add(playerId);
+            player.sendMessage("§a[OreMining] §fNotifications disabled.");
+        }
+    }
+    
+    public void addToWhitelist(Player player) {
+        whitelistedPlayers.add(player.getUniqueId());
+        config.addWhitelistedPlayer(player.getName());
+        player.sendMessage("§a[OreMining] §fAdded to whitelist.");
+    }
+    
+    public void removeFromWhitelist(Player player) {
+        whitelistedPlayers.remove(player.getUniqueId());
+        config.removeWhitelistedPlayer(player.getName());
+        player.sendMessage("§a[OreMining] §fRemoved from whitelist.");
+    }
+    
+    public List<OreMiningStats> getTopPlayers(int limit) {
+        return playerStats.values().stream()
+            .sorted(Comparator.comparingInt(OreMiningStats::getTotalBlocks).reversed())
+            .limit(limit)
+            .toList();
+    }
+    
+    public OreMiningStats getPlayerStats(UUID playerId) {
+        return playerStats.get(playerId);
+    }
+    
+    public Map<Material, Integer> getPlayerBlockStats(UUID playerId) {
+        OreMiningStats stats = playerStats.get(playerId);
+        return stats != null ? stats.getBlockCounts() : new HashMap<>();
+    }
+    
+    public void clearPlayerStats(UUID playerId) {
+        playerStats.remove(playerId);
+        lastMiningTime.remove(playerId);
+    }
+    
+    public void clearAllStats() {
+        playerStats.clear();
+        lastMiningTime.clear();
+    }
+    
+    public boolean isPlayerWhitelisted(UUID playerId) {
+        return whitelistedPlayers.contains(playerId);
+    }
+    
+    public boolean isPlayerToggledOff(UUID playerId) {
+        return toggledOffPlayers.contains(playerId);
+    }
+} 

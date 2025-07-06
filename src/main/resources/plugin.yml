@@ -4,10 +4,24 @@ version: ${version}
 website: "https://www.dapirates.xyz/"
 author: KiratDewas
 prefix: PiratesAddons
-description: A small quality of life tweak to the Mending enchantment. Only supports PaperMC 1.21.7
+description: A small quality of life tweak to the Mending enchantment and ore mining notifications. Only supports PaperMC 1.21.7
 api-version: 1.21
 
 commands:
   show:
     description: Show the item you are holding in chat
     usage: /show
+  oremining:
+    description: Manage ore mining notifications and statistics
+    usage: /oremining help
+    aliases: [om, ores]
+
+permissions:
+  pc.ores.notify:
+    description: Allows players to receive ore mining notifications
+    default: op
+  pc.ores.notify.admin:
+    description: Allows access to admin commands for ore mining system
+    default: op
+    children:
+      pc.ores.notify: true

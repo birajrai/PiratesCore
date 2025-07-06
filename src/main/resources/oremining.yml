@@ -1,0 +1,217 @@
+# OreMining Configuration
+# This file contains all settings for the ore mining notification system
+
+general:
+  # Enable/disable the entire system
+  enabled: true
+  
+  # Send notifications to console
+  console-notifications: true
+  
+  # Allow players to receive notifications about their own mining
+  self-notifications: true
+  
+  # Enable whitelist system (only whitelisted players receive notifications)
+  whitelist-enabled: false
+  
+  # Enable TNT mining detection
+  tnt-mining-enabled: true
+  
+  # Message format: "text" or "embed" (for future Discord integration)
+  message-format: "text"
+
+# Height and light level controls
+controls:
+  # Minimum Y coordinate to track (inclusive)
+  min-height: -64
+  
+  # Maximum Y coordinate to track (inclusive)
+  max-height: 320
+  
+  # Minimum light level to track (inclusive)
+  min-light-level: 0
+  
+  # Maximum light level to track (inclusive)
+  max-light-level: 15
+
+# Time-based alert settings
+alerts:
+  time-based:
+    # Enable time-based alerts
+    enabled: true
+    
+    # Timeframe in minutes to check for excessive mining
+    timeframe-minutes: 5
+    
+    # Number of blocks that triggers an alert
+    threshold: 10
+    
+    # Alert message format
+    message: "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!"
+
+# Player whitelist (only used if whitelist-enabled is true)
+whitelist:
+  players:
+    - "admin1"
+    - "admin2"
+
+# Block-specific configurations
+blocks:
+  # Diamond Ores
+  diamond_ore:
+    enabled: true
+    message: "§b[OreMining] §f{player} found §bDiamond Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_diamond_ore:
+    enabled: true
+    message: "§b[OreMining] §f{player} found §bDeepslate Diamond Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    show-coordinates: true
+    commands: []
+  
+  # Emerald Ores
+  emerald_ore:
+    enabled: true
+    message: "§a[OreMining] §f{player} found §aEmerald Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_emerald_ore:
+    enabled: true
+    message: "§a[OreMining] §f{player} found §aDeepslate Emerald Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    show-coordinates: true
+    commands: []
+  
+  # Gold Ores
+  gold_ore:
+    enabled: true
+    message: "§6[OreMining] §f{player} found §6Gold Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_gold_ore:
+    enabled: true
+    message: "§6[OreMining] §f{player} found §6Deepslate Gold Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Iron Ores
+  iron_ore:
+    enabled: true
+    message: "§7[OreMining] §f{player} found §7Iron Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_iron_ore:
+    enabled: true
+    message: "§7[OreMining] §f{player} found §7Deepslate Iron Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Copper Ores
+  copper_ore:
+    enabled: true
+    message: "§c[OreMining] §f{player} found §cCopper Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_copper_ore:
+    enabled: true
+    message: "§c[OreMining] §f{player} found §cDeepslate Copper Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Coal Ores
+  coal_ore:
+    enabled: true
+    message: "§8[OreMining] §f{player} found §8Coal Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_coal_ore:
+    enabled: true
+    message: "§8[OreMining] §f{player} found §8Deepslate Coal Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Redstone Ores
+  redstone_ore:
+    enabled: true
+    message: "§4[OreMining] §f{player} found §4Redstone Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_redstone_ore:
+    enabled: true
+    message: "§4[OreMining] §f{player} found §4Deepslate Redstone Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Lapis Ores
+  lapis_ore:
+    enabled: true
+    message: "§9[OreMining] §f{player} found §9Lapis Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  deepslate_lapis_ore:
+    enabled: true
+    message: "§9[OreMining] §f{player} found §9Deepslate Lapis Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  # Nether Ores
+  ancient_debris:
+    enabled: true
+    message: "§5[OreMining] §f{player} found §5Ancient Debris§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "ENTITY_ENDER_DRAGON_GROWL"
+    show-coordinates: true
+    commands: []
+  
+  nether_gold_ore:
+    enabled: true
+    message: "§6[OreMining] §f{player} found §6Nether Gold Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+  
+  nether_quartz_ore:
+    enabled: true
+    message: "§f[OreMining] §f{player} found §fNether Quartz Ore§f at §e{x}, {y}, {z}§f in §a{world}§f!"
+    sound: "BLOCK_NOTE_BLOCK_PLING"
+    show-coordinates: true
+    commands: []
+
+# Example of how to add custom commands for specific blocks:
+# diamond_ore:
+#   enabled: true
+#   message: "§b[OreMining] §f{player} found §bDiamond Ore§f!"
+#   sound: "ENTITY_PLAYER_LEVELUP"
+#   show-coordinates: true
+#   commands:
+#     - "broadcast {player} found diamonds!"
+#     - "give {player} diamond 1"
+#     - "effect give {player} minecraft:glowing 30 1"
+
+# Available placeholders for messages and commands:
+# {player} - Player name
+# {block} - Block name
+# {x}, {y}, {z} - Coordinates
+# {world} - World name 
