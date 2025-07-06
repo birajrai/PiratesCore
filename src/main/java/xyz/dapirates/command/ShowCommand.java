@@ -28,19 +28,25 @@ public class ShowCommand implements CommandExecutor {
         }
 
         // Get the item's display name component (preserves exact formatting and color)
-        Component itemComponent = item.displayName();
-
+        Component rawNameComponent = item.displayName();
+        String rawNameWithCodes = LegacyComponentSerializer.legacySection().serialize(rawNameComponent);
+        // Remove color codes (e.g., §a) for bracket check
+        String rawNamePlain = rawNameWithCodes.replaceAll("§[0-9a-fk-or]", "");
+        Component itemComponent = rawNameComponent;
+        
         // Add quantity if more than 1 item (inside the brackets)
         int quantity = item.getAmount();
         if (quantity > 1) {
             itemComponent = itemComponent.append(Component.text(" x" + quantity, NamedTextColor.GRAY));
         }
-
-        // Wrap the entire item component (including quantity) in brackets
-        itemComponent = Component.text("[", NamedTextColor.WHITE)
+        
+        // Only add brackets if not already present in plain text
+        if (!(rawNamePlain.startsWith("[") && rawNamePlain.endsWith("]"))) {
+            itemComponent = Component.text("[", NamedTextColor.WHITE)
                 .append(itemComponent)
                 .append(Component.text("]", NamedTextColor.WHITE));
-
+        }
+        
         // Add lore information if available
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
             String loreInfo = item.getItemMeta().getLore().get(0); // Get first lore line
@@ -48,10 +54,10 @@ public class ShowCommand implements CommandExecutor {
                 // Convert lore color codes to component
                 Component loreComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(loreInfo);
                 itemComponent = itemComponent.append(Component.text(" shows ", NamedTextColor.WHITE))
-                        .append(loreComponent);
+                    .append(loreComponent);
             }
         }
-
+        
         // Add hover event to show item details
         itemComponent = itemComponent.hoverEvent(item.asHoverEvent());
 
