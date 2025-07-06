@@ -40,7 +40,7 @@ public class OreMiningConfig {
         config.addDefault("general.enabled", true);
         config.addDefault("general.console-notifications", true);
         config.addDefault("general.self-notifications", true);
-        config.addDefault("general.whitelist-enabled", false);
+        config.addDefault("general.ignore-enabled", false);
         config.addDefault("general.tnt-mining-enabled", true);
         config.addDefault("general.message-format", "text"); // "text" or "embed"
 
@@ -57,8 +57,8 @@ public class OreMiningConfig {
         config.addDefault("alerts.time-based.message",
                 "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
 
-        // Whitelist
-        config.addDefault("whitelist.players", Arrays.asList("admin1", "admin2"));
+        // Ignore list
+        config.addDefault("ignore.players", Arrays.asList());
 
         // Default tracked blocks
         setupDefaultBlocks();
@@ -143,8 +143,8 @@ public class OreMiningConfig {
         return config.getBoolean("general.self-notifications", true);
     }
 
-    public boolean isWhitelistEnabled() {
-        return config.getBoolean("general.whitelist-enabled", false);
+    public boolean isIgnoreEnabled() {
+        return config.getBoolean("general.ignore-enabled", false);
     }
 
     public boolean isTNTMiningEnabled() {
@@ -206,24 +206,24 @@ public class OreMiningConfig {
                 .replace("{timeframe}", String.valueOf(timeframeMinutes));
     }
 
-    // Whitelist
-    public List<String> getWhitelistedPlayers() {
-        return config.getStringList("whitelist.players");
+    // Ignore list
+    public List<String> getIgnoredPlayers() {
+        return config.getStringList("ignore.players");
     }
 
-    public void addWhitelistedPlayer(String playerName) {
-        List<String> whitelist = getWhitelistedPlayers();
-        if (!whitelist.contains(playerName)) {
-            whitelist.add(playerName);
-            config.set("whitelist.players", whitelist);
+    public void addIgnoredPlayer(String playerName) {
+        List<String> ignore = getIgnoredPlayers();
+        if (!ignore.contains(playerName)) {
+            ignore.add(playerName);
+            config.set("ignore.players", ignore);
             saveConfig();
         }
     }
 
-    public void removeWhitelistedPlayer(String playerName) {
-        List<String> whitelist = getWhitelistedPlayers();
-        whitelist.remove(playerName);
-        config.set("whitelist.players", whitelist);
+    public void removeIgnoredPlayer(String playerName) {
+        List<String> ignore = getIgnoredPlayers();
+        ignore.remove(playerName);
+        config.set("ignore.players", ignore);
         saveConfig();
     }
 
