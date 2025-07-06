@@ -21,26 +21,26 @@ import java.util.stream.Collectors;
 import java.util.LinkedList;
 
 public class OreMiningCommand implements CommandExecutor, TabCompleter {
-    
+
     private final Core plugin;
     private final OreMiningNotifier notifier;
     private final OreMiningConfig config;
-    
+
     public OreMiningCommand(Core plugin, OreMiningNotifier notifier) {
         this.plugin = plugin;
         this.notifier = notifier;
         this.config = new OreMiningConfig(plugin);
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§7Available commands: toggle, reload, stats, top, clear");
             return true;
         }
-        
+
         String subCommand = args[0].toLowerCase();
-        
+
         switch (subCommand) {
             case "toggle":
                 if (!(sender instanceof Player)) {
@@ -79,12 +79,10 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§7Available commands: toggle, reload, stats, top, clear");
                 break;
         }
-        
+
         return true;
     }
-    
 
-    
     private void handleStatsCommand(CommandSender sender, String[] args) {
         if (args.length > 1 && sender.hasPermission("pc.ores.notify.admin")) {
             // Show stats for specific player
@@ -102,29 +100,29 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("§cYou must be a player to view your own stats!");
         }
     }
-    
+
     private void showPlayerStats(CommandSender sender, Player player) {
         OreMiningStats stats = notifier.getPlayerStats(player.getUniqueId());
         if (stats == null) {
             sender.sendMessage("§cNo statistics found for " + player.getName());
             return;
         }
-        
+
         sender.sendMessage("§a=== Mining Statistics for " + player.getName() + " ===");
         sender.sendMessage("§fTotal blocks mined: §e" + stats.getTotalBlocks());
-        
+
         Map<Material, Integer> blockCounts = stats.getBlockCounts();
         if (!blockCounts.isEmpty()) {
             sender.sendMessage("§fBlock breakdown:");
             blockCounts.entrySet().stream()
-                .sorted(Map.Entry.<Material, Integer>comparingByValue().reversed())
-                .forEach(entry -> {
-                    String blockName = entry.getKey().name().replace("_", " ");
-                    sender.sendMessage("§7  " + blockName + ": §e" + entry.getValue());
-                });
+                    .sorted(Map.Entry.<Material, Integer>comparingByValue().reversed())
+                    .forEach(entry -> {
+                        String blockName = entry.getKey().name().replace("_", " ");
+                        sender.sendMessage("§7  " + blockName + ": §e" + entry.getValue());
+                    });
         }
     }
-    
+
     private void handleTopCommand(CommandSender sender, String[] args) {
         int limit = 10;
         if (args.length > 1) {
@@ -139,43 +137,49 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 return;
             }
         }
-        
+
         List<OreMiningStats> topPlayers = notifier.getTopPlayers(limit);
-        
+
         sender.sendMessage("§a=== Top " + limit + " Miners ===");
         if (topPlayers.isEmpty()) {
             sender.sendMessage("§7No mining data available.");
             return;
         }
-        
+
         for (int i = 0; i < topPlayers.size(); i++) {
             OreMiningStats stats = topPlayers.get(i);
             String playerName = Bukkit.getOfflinePlayer(stats.getPlayerId()).getName();
-            if (playerName == null) playerName = "Unknown";
-            
+            if (playerName == null)
+                playerName = "Unknown";
+
             String rank = getRankColor(i + 1);
-            sender.sendMessage(rank + "#" + (i + 1) + " §f" + playerName + " §7- §e" + stats.getTotalBlocks() + " blocks");
+            sender.sendMessage(
+                    rank + "#" + (i + 1) + " §f" + playerName + " §7- §e" + stats.getTotalBlocks() + " blocks");
         }
     }
-    
+
     private String getRankColor(int rank) {
         switch (rank) {
-            case 1: return "§6"; // Gold
-            case 2: return "§7"; // Silver
-            case 3: return "§c"; // Bronze
-            default: return "§f"; // White
+            case 1:
+                return "§6"; // Gold
+            case 2:
+                return "§7"; // Silver
+            case 3:
+                return "§c"; // Bronze
+            default:
+                return "§f"; // White
         }
     }
-    
+
     private void handleWhitelistCommand(CommandSender sender, String[] args) {
         if (args.length < 3) {
             sender.sendMessage("§cUsage: /oremining whitelist <add|remove> <player>");
             return;
         }
-        
+
         String action = args[1].toLowerCase();
         String playerName = args[2];
-        
+
         switch (action) {
             case "add":
                 notifier.addToWhitelist(Bukkit.getPlayer(playerName));
@@ -190,9 +194,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                 break;
         }
     }
-    
 
-    
     private void handleClearCommand(CommandSender sender, String[] args) {
         if (args.length > 1) {
             // Clear specific player stats
@@ -210,9 +212,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("§a[OreMining] §fCleared all mining statistics.");
         }
     }
-    
 
-    
     private void handleLogsCommand(CommandSender sender, String[] args) {
         if (args.length > 1 && args[1].equalsIgnoreCase("clear")) {
             // Clear logs
@@ -257,17 +257,17 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             }
         }
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
-        
+
         if (args.length == 1) {
             List<String> subCommands = Arrays.asList("toggle", "stats", "top");
             if (sender.hasPermission("pc.ores.notify.admin")) {
                 subCommands = Arrays.asList("toggle", "reload", "stats", "top", "clear");
             }
-            
+
             String input = args[0].toLowerCase();
             for (String subCommand : subCommands) {
                 if (subCommand.startsWith(input)) {
@@ -276,7 +276,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length == 2) {
             String subCommand = args[0].toLowerCase();
-            
+
             switch (subCommand) {
                 case "stats":
                 case "clear":
@@ -291,7 +291,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
                     break;
             }
         }
-        
+
         return completions;
     }
-} 
+}

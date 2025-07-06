@@ -12,13 +12,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import xyz.dapirates.Core;
 import xyz.dapirates.data.OreMiningData;
 import xyz.dapirates.data.OreMiningStats;
 import xyz.dapirates.data.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
-import xyz.dapirates.utils.OreMiningLogger;
 import xyz.dapirates.managers.DatabaseManager;
 import xyz.dapirates.managers.MessageManager;
 
@@ -281,10 +279,11 @@ public class OreMiningNotifier implements Listener {
             }
             StringBuilder breakdown = new StringBuilder();
             for (var e : oreCounts.entrySet()) {
-                if (breakdown.length() > 0) breakdown.append("§7, ");
+                if (breakdown.length() > 0)
+                    breakdown.append("§7, ");
                 breakdown.append(getPrettyOreName(e.getKey())).append(": §e").append(e.getValue());
             }
-            String alertMessage = "§c[OreMining] §f" + player.getName() + " has mined in the last " + (config.getTimeBasedAlertTimeframe() / 60000) + " minutes: " + breakdown;
+            String alertMessage = "§c[OreMining] §f" + player.getName() + " has mined: " + breakdown;
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.hasPermission("pc.ores.notify.admin")) {
                     onlinePlayer.sendMessage(alertMessage);

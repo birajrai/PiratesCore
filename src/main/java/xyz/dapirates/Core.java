@@ -18,25 +18,25 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class Core extends JavaPlugin {
-    
+
     private OreMiningNotifier oreMiningNotifier;
     private OreMiningConfig oreMiningConfig;
     private CommandManager commandManager;
     private FeatureManager featureManager;
     private DatabaseManager databaseManager;
     private MessageManager messageManager;
-    
+
     @Override
     public void onEnable() {
         // Initialize managers
         initializeManagers();
-        
+
         // Register features
         featureManager.registerFeatures();
-        
+
         // Register commands
         commandManager.registerCommands(oreMiningNotifier);
-        
+
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
 
@@ -62,40 +62,41 @@ public class Core extends JavaPlugin {
                 }
             }
             // Wait for all saves to complete (with timeout)
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).orTimeout(5, java.util.concurrent.TimeUnit.SECONDS).exceptionally(e -> null).join();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .orTimeout(5, java.util.concurrent.TimeUnit.SECONDS).exceptionally(e -> null).join();
         }
         if (databaseManager != null) {
             databaseManager.close();
         }
         getLogger().info("Core plugin disabled!");
     }
-    
+
     private void initializeManagers() {
         // Initialize ore mining config
         oreMiningConfig = new OreMiningConfig(this);
-        
+
         // Initialize managers first
         commandManager = new CommandManager(this);
         featureManager = new FeatureManager(this);
         databaseManager = new DatabaseManager(this);
         messageManager = new MessageManager(this);
-        
+
         // Initialize ore mining feature after managers
         oreMiningNotifier = new OreMiningNotifier(this);
     }
-    
+
     public OreMiningNotifier getOreMiningNotifier() {
         return oreMiningNotifier;
     }
-    
+
     public OreMiningConfig getOreMiningConfig() {
         return oreMiningConfig;
     }
-    
+
     public DatabaseManager getDatabaseManager() {
         return databaseManager;
     }
-    
+
     public MessageManager getMessageManager() {
         return messageManager;
     }

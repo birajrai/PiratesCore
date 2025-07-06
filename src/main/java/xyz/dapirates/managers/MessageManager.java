@@ -106,33 +106,34 @@ public class MessageManager {
         };
     }
 
-    public String processPlaceholders(Player player, String message, Material material, org.bukkit.Location location, boolean isTNT) {
+    public String processPlaceholders(Player player, String message, Material material, org.bukkit.Location location,
+            boolean isTNT) {
         // Replace basic placeholders
         String processed = message
-            .replace("{player}", player.getName())
-            .replace("{block}", material != null ? material.name().replace("_", " ") : "BLOCK")
-            .replace("{world}", location != null ? location.getWorld().getName() : "world")
-            .replace("{x}", location != null ? String.valueOf(location.getBlockX()) : "x")
-            .replace("{y}", location != null ? String.valueOf(location.getBlockY()) : "y")
-            .replace("{z}", location != null ? String.valueOf(location.getBlockZ()) : "z");
-        
+                .replace("{player}", player.getName())
+                .replace("{block}", material != null ? material.name().replace("_", " ") : "BLOCK")
+                .replace("{world}", location != null ? location.getWorld().getName() : "world")
+                .replace("{x}", location != null ? String.valueOf(location.getBlockX()) : "x")
+                .replace("{y}", location != null ? String.valueOf(location.getBlockY()) : "y")
+                .replace("{z}", location != null ? String.valueOf(location.getBlockZ()) : "z");
+
         if (isTNT) {
             processed = processed.replace("found", "found (TNT)");
         }
-        
+
         // Process PlaceholderAPI placeholders if available
         if (placeholderApiEnabled) {
             try {
                 // Use reflection to avoid direct dependency
                 Class<?> placeholderApiClass = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
                 Object placeholderApi = placeholderApiClass.getMethod("setPlaceholders", Player.class, String.class)
-                    .invoke(null, player, processed);
+                        .invoke(null, player, processed);
                 processed = (String) placeholderApi;
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to process PlaceholderAPI placeholders: " + e.getMessage());
             }
         }
-        
+
         return processed;
     }
 
