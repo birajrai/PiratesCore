@@ -27,19 +27,19 @@ public class ShowCommand implements CommandExecutor {
             player.sendMessage("You are not holding any item.");
             return true;
         }
-        
+
         // Get the item's display name component (preserves exact formatting and color)
         Component itemComponent = item.displayName();
-        
+
         // Add quantity if more than 1 item
         int quantity = item.getAmount();
         if (quantity > 1) {
             itemComponent = itemComponent.append(Component.text(" x" + quantity, NamedTextColor.GRAY));
         }
-        
+
         // Add hover event to show item details
         itemComponent = itemComponent.hoverEvent(item.asHoverEvent());
-        
+
         // Get player's prefix from LuckPerms
         Component playerPrefixComponent = Component.empty();
         try {
@@ -55,12 +55,12 @@ public class ShowCommand implements CommandExecutor {
         } catch (Exception e) {
             // LuckPerms not available, use default
         }
-        
+
         // Create message with prefix and item
         Component message = Component.text(player.getName() + " shows you the item [", NamedTextColor.GREEN)
-            .append(itemComponent)
-            .append(Component.text("]", NamedTextColor.GREEN));
-        
+                .append(itemComponent)
+                .append(Component.text("]", NamedTextColor.GREEN));
+
         // Insert prefix at the beginning
         if (!playerPrefixComponent.equals(Component.empty())) {
             message = playerPrefixComponent.append(message);
@@ -70,4 +70,4 @@ public class ShowCommand implements CommandExecutor {
         }
         return true;
     }
-} 
+}
