@@ -38,55 +38,20 @@ public class BetterMending implements Listener {
             if (!meta.hasDamage())
                 return;
 
-            int expValue = 20; // Default value, config not available here
-            int playerXP = getPlayerXP(player);
+            // Calculate how much can be repaired: 1 XP = 2 durability
             int itemDamage = meta.getDamage();
-            if (playerXP < expValue)
+            int playerXP = getPlayerXP(player);
+            int maxRepairable = Math.min(itemDamage, playerXP * 2);
+            if (maxRepairable <= 0)
                 return;
-
-            int newDamage = Math.max(0, itemDamage - expValue);
+            int xpToUse = (maxRepairable + 1) / 2; // round up if odd
+            int newDamage = itemDamage - maxRepairable;
             meta.setDamage(newDamage);
             item.setItemMeta(meta);
-            changePlayerExp(player, -expValue);
+            changePlayerExp(player, -xpToUse);
 
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
             e.setCancelled(true);
-        }
-        // Left click for armor/elytra
-        else if (e.getAction() == Action.LEFT_CLICK_AIR) {
-            ItemStack[] armorContents = player.getInventory().getArmorContents();
-            for (int i = 0; i < armorContents.length; i++) {
-                ItemStack armorItem = armorContents[i];
-                if (armorItem != null && armorItem.getType() != Material.AIR) {
-                    if (!armorItem.containsEnchantment(Enchantment.MENDING))
-                        continue;
-                    if (!(armorItem.getItemMeta() instanceof Damageable))
-                        continue;
-
-                    Damageable meta = (Damageable) armorItem.getItemMeta();
-                    if (!meta.hasDamage())
-                        continue;
-
-                    int expValue = 20; // Default value, config not available here
-                    int playerXP = getPlayerXP(player);
-                    int itemDamage = meta.getDamage();
-                    if (playerXP < expValue)
-                        continue;
-
-                    int newDamage = Math.max(0, itemDamage - expValue);
-                    meta.setDamage(newDamage);
-                    armorItem.setItemMeta(meta);
-                    changePlayerExp(player, -expValue);
-
-                    // Update the armor slot with the repaired item
-                    armorContents[i] = armorItem;
-                    player.getInventory().setArmorContents(armorContents);
-
-                    player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1, 1);
-                    e.setCancelled(true);
-                    return;
-                }
-            }
         }
     }
 
@@ -118,4 +83,4 @@ public class BetterMending implements Listener {
         else
             return (int) (4.5 * level * level - 162.5 * level + 2220);
     }
-} 
+}
