@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import xyz.dapirates.Core;
-import xyz.dapirates.data.OreMiningData;
 import xyz.dapirates.data.OreMiningStats;
 import xyz.dapirates.data.MiningSession;
 import xyz.dapirates.utils.OreMiningConfig;
@@ -35,7 +34,6 @@ public class OreMiningNotifier implements Listener {
     private final Map<UUID, MiningSession> miningSessions;
     private final Set<UUID> whitelistedPlayers;
     private final Set<UUID> toggledOffPlayers;
-    private final Map<UUID, Long> lastAlertTime = new ConcurrentHashMap<>();
 
     public OreMiningNotifier(Core plugin) {
         this.plugin = plugin;
@@ -156,9 +154,6 @@ public class OreMiningNotifier implements Listener {
             databaseManager.addMiningEntryAsync(playerId, material, location.getWorld().getName(),
                     location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
         }
-
-        // Check for time-based alerts
-        checkTimeBasedAlerts(player, stats, currentTime);
     }
 
     private void sendOreMiningNotification(Player miner, Material material, Location location) {
@@ -260,39 +255,6 @@ public class OreMiningNotifier implements Listener {
                 return "§fNether Quartz Ore";
             default:
                 return "§f" + material.name().replace("_", " ").toLowerCase();
-        }
-    }
-
-    private void checkTimeBasedAlerts(Player player, OreMiningStats stats, long currentTime) {
-        int blocksInTimeframe = stats.getBlocksInTimeframe(currentTime, config.getTimeBasedAlertTimeframe());
-        int threshold = config.getTimeBasedAlertThreshold();
-        long cooldown = config.getTimeBasedAlertTimeframe(); // Use the same as the timeframe for cooldown
-        UUID playerId = player.getUniqueId();
-        long lastAlert = lastAlertTime.getOrDefault(playerId, 0L);
-        if (blocksInTimeframe >= threshold && (currentTime - lastAlert > cooldown)) {
-            // Build breakdown per ore type
-            long cutoffTime = currentTime - config.getTimeBasedAlertTimeframe();
-            var history = stats.getMiningHistory(cutoffTime);
-            Map<org.bukkit.Material, Integer> oreCounts = new java.util.HashMap<>();
-            for (var entry : history) {
-                oreCounts.merge(entry.getMaterial(), 1, Integer::sum);
-            }
-            StringBuilder breakdown = new StringBuilder();
-            for (var e : oreCounts.entrySet()) {
-                if (breakdown.length() > 0)
-                    breakdown.append("§7, ");
-                breakdown.append(getPrettyOreName(e.getKey())).append(": §e").append(e.getValue());
-            }
-            String alertMessage = "§c[OreMining] §f" + player.getName() + " has mined: " + breakdown;
-            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (onlinePlayer.hasPermission("pc.ores.notify.admin")) {
-                    onlinePlayer.sendMessage(alertMessage);
-                }
-            }
-            if (config.isConsoleNotificationsEnabled()) {
-                Bukkit.getConsoleSender().sendMessage(alertMessage);
-            }
-            lastAlertTime.put(playerId, currentTime);
         }
     }
 
