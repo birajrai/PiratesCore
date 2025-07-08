@@ -49,11 +49,21 @@
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
+
                                     <excludes>
+                                        <exclude>plugin.yml</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/io.netty.versions.properties</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>xyz.dapirates:piratescore</artifact>
+                                    <includes>
+                                        <include>plugin.yml</include>
+                                    </includes>
                                 </filter>
                             </filters>
                         </configuration>
