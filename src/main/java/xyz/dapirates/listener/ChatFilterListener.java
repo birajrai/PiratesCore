@@ -61,21 +61,29 @@ public class ChatFilterListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String message = event.getMessage();
-        String lowerMessage = message.toLowerCase();
         boolean found = false;
         String foundWord = null;
         for (String badWord : badWords) {
             if (badWord.isEmpty())
                 continue;
-            int index = lowerMessage.indexOf(badWord);
-            while (index != -1) {
-                String replacement = "*".repeat(badWord.length());
-                message = message.substring(0, index) + replacement + message.substring(index + badWord.length());
-                lowerMessage = message.toLowerCase();
+            // Regex to match the bad word as a whole word, at the start, or at the end of a
+            // word, but not in the middle
+            Pattern pattern = Pattern.compile(
+                    "\\b" + Pattern.quote(badWord) + "\\b" + // exact word
+                            "|\\b" + Pattern.quote(badWord) + "\\w+\\b" + // prefix
+                            "|\\b\\w+" + Pattern.quote(badWord) + "\\b", // suffix
+                    Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(message);
+            StringBuffer sb = new StringBuffer();
+            while (matcher.find()) {
+                String matchedWord = matcher.group();
+                String replacement = "*".repeat(matchedWord.length());
+                matcher.appendReplacement(sb, replacement);
                 found = true;
                 foundWord = badWord;
-                index = lowerMessage.indexOf(badWord, index + replacement.length());
             }
+            matcher.appendTail(sb);
+            message = sb.toString();
         }
         // Add the current message to chat history
         synchronized (chatHistory) {

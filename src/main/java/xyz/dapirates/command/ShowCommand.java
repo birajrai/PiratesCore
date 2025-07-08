@@ -73,7 +73,9 @@ public class ShowCommand implements CommandExecutor {
                 if (prefix != null && !prefix.trim().isEmpty()) {
                     // Handle both legacy color codes and MiniMessage format
                     if (prefix.contains("§") || prefix.contains("&")) {
-                        return LEGACY_SERIALIZER.deserialize(prefix);
+                        // Support & color codes by replacing with §
+                        String legacyPrefix = prefix.replace('&', '§');
+                        return LEGACY_SERIALIZER.deserialize(legacyPrefix);
                     } else {
                         return MINI_MESSAGE.deserialize(prefix);
                     }
@@ -131,8 +133,9 @@ public class ShowCommand implements CommandExecutor {
             return MINI_MESSAGE.deserialize(loreLine);
         } catch (Exception e) {
             try {
-                // Fallback to legacy color codes
-                return LEGACY_SERIALIZER.deserialize(loreLine);
+                // Fallback to legacy color codes, support & by replacing with §
+                String legacyLore = loreLine.replace('&', '§');
+                return LEGACY_SERIALIZER.deserialize(legacyLore);
             } catch (Exception e2) {
                 // If all else fails, return as plain text
                 return Component.text(loreLine, NamedTextColor.GRAY);
