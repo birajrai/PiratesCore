@@ -14,9 +14,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class ShowCommand implements CommandExecutor {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final Map<UUID, Long> cooldowns = new HashMap<>();
+    private static final long COOLDOWN_MILLIS = 3000;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -26,6 +32,20 @@ public class ShowCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        if (cooldowns.containsKey(uuid)) {
+            long lastUsed = cooldowns.get(uuid);
+            if (now - lastUsed < COOLDOWN_MILLIS) {
+                long secondsLeft = (COOLDOWN_MILLIS - (now - lastUsed)) / 1000 + 1;
+                player.sendMessage(
+                        Component.text("You must wait " + secondsLeft + " seconds before using this command again.",
+                                NamedTextColor.RED));
+                return true;
+            }
+        }
+        cooldowns.put(uuid, now);
+
         ItemStack item = player.getInventory().getItemInMainHand();
 
         if (item == null || item.getType().isAir()) {
