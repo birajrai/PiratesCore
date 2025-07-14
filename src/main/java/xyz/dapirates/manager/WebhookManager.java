@@ -16,7 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import xyz.dapirates.utils.ConfigUtils;
 
+/**
+ * Manages sending messages and embeds to Discord (or other) webhooks.
+ * Loads webhook URLs from configuration and supports both simple and embed messages.
+ */
 public class WebhookManager {
     private final Core plugin;
     private final File configFile;
@@ -31,11 +36,11 @@ public class WebhookManager {
         loadConfig();
     }
 
+    /**
+     * Loads the webhook configuration from file.
+     */
     public void loadConfig() {
-        if (!configFile.exists()) {
-            plugin.saveResource("Webhook.yml", false);
-        }
-        config = YamlConfiguration.loadConfiguration(configFile);
+        config = ConfigUtils.loadConfig(plugin, "Webhook.yml");
         webhooks = new HashMap<>();
 
         // Support old format: webhooks: { name: url }
@@ -59,10 +64,18 @@ public class WebhookManager {
         }
     }
 
+    /**
+     * Reloads the webhook configuration.
+     */
     public void reloadConfig() {
         loadConfig();
     }
 
+    /**
+     * Gets the webhook URL for a given name.
+     * @param name The webhook name
+     * @return The webhook URL, or null if not found
+     */
     public String getWebhookUrl(String name) {
         if (name == null || name.isEmpty()) {
             // Return the first available webhook if no name specified
@@ -71,6 +84,11 @@ public class WebhookManager {
         return webhooks.get(name);
     }
 
+    /**
+     * Sends a simple text message to a webhook asynchronously.
+     * @param webhookName The webhook name
+     * @param content The message content
+     */
     public void sendSimple(String webhookName, String content) {
         String url = getWebhookUrl(webhookName);
         if (url == null || url.isEmpty())
@@ -85,6 +103,16 @@ public class WebhookManager {
         });
     }
 
+    /**
+     * Sends an embed message to a webhook asynchronously.
+     * @param webhookName The webhook name
+     * @param title The embed title
+     * @param description The embed description
+     * @param fields The embed fields
+     * @param color The embed color (hex)
+     * @param avatarUrl The avatar URL
+     * @param username The username to display
+     */
     public void sendEmbed(String webhookName, String title, String description, List<Field> fields, String color,
             String avatarUrl, String username) {
         String url = getWebhookUrl(webhookName);
@@ -160,6 +188,9 @@ public class WebhookManager {
         }
     }
 
+    /**
+     * Represents a field in a Discord embed message.
+     */
     public static class Field {
         public final String name;
         public final String value;
