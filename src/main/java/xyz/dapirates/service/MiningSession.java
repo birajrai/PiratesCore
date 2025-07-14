@@ -15,7 +15,7 @@ public class MiningSession {
     private long lastMiningTime;
     private boolean notificationScheduled;
 
-    public MiningSession(Player player) {
+    public MiningSession(final Player player) {
         this.playerId = player.getUniqueId();
         this.playerName = player.getName();
         this.minedBlocks = new HashMap<>();
@@ -24,7 +24,7 @@ public class MiningSession {
         this.notificationScheduled = false;
     }
 
-    public void addBlock(Material material) {
+    public void addBlock(final Material material) {
         minedBlocks.merge(material, 1, Integer::sum);
         lastMiningTime = System.currentTimeMillis();
     }
@@ -65,7 +65,7 @@ public class MiningSession {
         return notificationScheduled;
     }
 
-    public void setNotificationScheduled(boolean notificationScheduled) {
+    public void setNotificationScheduled(final boolean notificationScheduled) {
         this.notificationScheduled = notificationScheduled;
     }
 
