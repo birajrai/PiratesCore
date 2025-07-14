@@ -8,30 +8,37 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import xyz.dapirates.core.Core;
 import xyz.dapirates.service.OreMiningData;
+import xyz.dapirates.utils.ConfigUtils;
+import xyz.dapirates.manager.MessageManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Loads and manages the OreMining.yml configuration, including tracked blocks, alert thresholds, and message formats.
+ */
 public class OreMiningConfig {
 
     private final Core plugin;
     private final File configFile;
     private FileConfiguration config;
+    private final MessageManager messageManager;
 
+    /**
+     * Constructs an OreMiningConfig for the plugin and loads the config file.
+     * @param plugin The main plugin instance
+     */
     public OreMiningConfig(Core plugin) {
         this.plugin = plugin;
         this.configFile = new File(plugin.getDataFolder(), "OreMining.yml");
+        this.messageManager = plugin.getMessageManager();
         loadConfig();
     }
 
     private void loadConfig() {
-        if (!configFile.exists()) {
-            plugin.saveResource("OreMining.yml", false);
-        }
-
-        config = YamlConfiguration.loadConfiguration(configFile);
+        config = ConfigUtils.loadConfig(plugin, "OreMining.yml");
         setupDefaults();
     }
 
@@ -119,18 +126,19 @@ public class OreMiningConfig {
     }
 
     public void saveConfig() {
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            plugin.getLogger().severe("Could not save OreMining.yml: " + e.getMessage());
-        }
+        ConfigUtils.saveConfig(config, configFile, plugin);
     }
 
+    /**
+     * Reloads the OreMining.yml configuration file.
+     */
     public void reloadConfig() {
         loadConfig();
     }
 
-    // General settings
+    /**
+     * Checks if the ore mining system is enabled.
+     */
     public boolean isEnabled() {
         return config.getBoolean("general.enabled", true);
     }
@@ -199,11 +207,12 @@ public class OreMiningConfig {
                 "§c[OreMining] §f{player} has mined {count} blocks in the last {timeframe} minutes!");
 
         long timeframeMinutes = getTimeBasedAlertTimeframe() / (60 * 1000);
-
-        return message
+        message = message
                 .replace("{player}", player.getName())
                 .replace("{count}", String.valueOf(count))
                 .replace("{timeframe}", String.valueOf(timeframeMinutes));
+        // Use MessageManager for any further placeholder processing
+        return messageManager.processPlaceholders(player, message, null, player.getLocation(), false);
     }
 
     // Ignore list
@@ -233,6 +242,9 @@ public class OreMiningConfig {
         return config.getBoolean(path + ".enabled", false);
     }
 
+    /**
+     * Returns the custom message for a block, with placeholders replaced.
+     */
     public String getCustomMessage(Material material, Player player, org.bukkit.Location location, boolean isTNT) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         String message = config.getString(path + ".message", "§a[OreMining] §f{player} found {block}!");
@@ -259,10 +271,13 @@ public class OreMiningConfig {
         if (isTNT) {
             message = message.replace("found", "found (TNT)");
         }
-
-        return message;
+        // Use MessageManager for any further placeholder processing
+        return messageManager.processPlaceholders(player, message, material, location, isTNT);
     }
 
+    /**
+     * Returns the custom sound for a block.
+     */
     public Sound getCustomSound(Material material) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         String soundName = config.getString(path + ".sound", Sound.BLOCK_NOTE_BLOCK_PLING.toString());
@@ -273,17 +288,26 @@ public class OreMiningConfig {
         }
     }
 
+    /**
+     * Returns the custom commands for a block.
+     */
     public List<String> getCustomCommands(Material material) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         return config.getStringList(path + ".commands");
     }
 
+    /**
+     * Returns true if coordinates should be shown for a block.
+     */
     public boolean isShowCoordinates(Material material) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         return config.getBoolean(path + ".show-coordinates", true);
     }
 
     // Block management
+    /**
+     * Adds a block to the tracked blocks list with custom settings.
+     */
     public void addTrackedBlock(Material material, String message, Sound sound, boolean showCoords) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.set(path + ".enabled", true);
@@ -294,12 +318,18 @@ public class OreMiningConfig {
         saveConfig();
     }
 
+    /**
+     * Removes a block from the tracked blocks list.
+     */
     public void removeTrackedBlock(Material material) {
         String path = "blocks." + material.getKey().getKey().toLowerCase();
         config.set(path, null);
         saveConfig();
     }
 
+    /**
+     * Returns the set of all tracked blocks.
+     */
     public Set<Material> getTrackedBlocks() {
         ConfigurationSection blocksSection = config.getConfigurationSection("blocks");
         if (blocksSection == null) {
