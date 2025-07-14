@@ -13,17 +13,32 @@ import xyz.dapirates.core.Core;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles all player and console messaging, including placeholder processing and JSON formatting.
+ */
 public class MessageManager {
 
     private final Core plugin;
     private final boolean placeholderApiEnabled;
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
+    /**
+     * Constructs a MessageManager for the given plugin.
+     * @param plugin The main plugin instance
+     */
     public MessageManager(Core plugin) {
         this.plugin = plugin;
         this.placeholderApiEnabled = plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
 
+    /**
+     * Sends a formatted message to a player, using placeholders and JSON if configured.
+     * @param player The player to send to
+     * @param message The message template
+     * @param material The block material (for placeholders)
+     * @param location The location (for placeholders)
+     * @param isTNT Whether TNT mining is involved
+     */
     public void sendMessage(Player player, String message, Material material, org.bukkit.Location location,
             boolean isTNT) {
         String processedMessage = processPlaceholders(player, message, material, location, isTNT);
@@ -35,11 +50,21 @@ public class MessageManager {
         }
     }
 
+    /**
+     * Sends a JSON-formatted message to a player.
+     * @param player The player to send to
+     * @param message The message content
+     * @param material The block material
+     * @param location The location
+     */
     public void sendJsonMessage(Player player, String message, Material material, org.bukkit.Location location) {
         Component component = createJsonComponent(message, material, location);
         player.sendMessage(component);
     }
 
+    /**
+     * Creates a JSON component from a message, adding color and hover/click events.
+     */
     private Component createJsonComponent(String message, Material material, org.bukkit.Location location) {
         // Parse the message and create a rich JSON component
         TextComponent.Builder builder = Component.text();
@@ -83,6 +108,9 @@ public class MessageManager {
         return builder.build();
     }
 
+    /**
+     * Maps a Minecraft color code to a NamedTextColor.
+     */
     private NamedTextColor getColorFromCode(char code) {
         return switch (code) {
             case '0' -> NamedTextColor.BLACK;
@@ -105,6 +133,15 @@ public class MessageManager {
         };
     }
 
+    /**
+     * Processes placeholders in a message, including PlaceholderAPI if available.
+     * @param player The player context
+     * @param message The message template
+     * @param material The block material
+     * @param location The location
+     * @param isTNT Whether TNT mining is involved
+     * @return The processed message
+     */
     public String processPlaceholders(Player player, String message, Material material, org.bukkit.Location location,
             boolean isTNT) {
         // Replace basic placeholders
@@ -136,6 +173,10 @@ public class MessageManager {
         return processed;
     }
 
+    /**
+     * Sends a message to the console, using JSON if configured.
+     * @param message The message to send
+     */
     public void sendConsoleMessage(String message) {
         if (plugin.getOreMiningConfig().getMessageFormat().equalsIgnoreCase("json")) {
             // Convert JSON to plain text for console
@@ -146,6 +187,14 @@ public class MessageManager {
         }
     }
 
+    /**
+     * Broadcasts a message to a list of players, using placeholders and JSON if configured.
+     * @param players The players to send to
+     * @param message The message template
+     * @param material The block material
+     * @param location The location
+     * @param isTNT Whether TNT mining is involved
+     */
     public void broadcastMessage(List<Player> players, String message, Material material, org.bukkit.Location location,
             boolean isTNT) {
         for (Player player : players) {
@@ -153,17 +202,26 @@ public class MessageManager {
         }
     }
 
+    /**
+     * Creates a clickable chat component.
+     */
     public Component createClickableComponent(String text, String command, String hoverText) {
         return Component.text(text)
                 .clickEvent(ClickEvent.runCommand(command))
                 .hoverEvent(HoverEvent.showText(Component.text(hoverText)));
     }
 
+    /**
+     * Creates a hoverable chat component.
+     */
     public Component createHoverComponent(String text, String hoverText) {
         return Component.text(text)
                 .hoverEvent(HoverEvent.showText(Component.text(hoverText)));
     }
 
+    /**
+     * @return true if PlaceholderAPI is enabled
+     */
     public boolean isPlaceholderApiEnabled() {
         return placeholderApiEnabled;
     }
