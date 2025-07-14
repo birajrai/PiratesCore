@@ -1,10 +1,10 @@
-name: ${name}
+name: PiratesCore
 main: xyz.dapirates.core.Core
-version: ${version}
+version: 1.0
 website: "https://www.dapirates.xyz/"
 author: KiratDewas
 prefix: PiratesCore
-description: ${description}
+description: PiratesCore plugin for advanced ore mining, chat filtering, and quality-of-life features.
 api-version: 1.21
 
 # Soft dependencies (optional)
