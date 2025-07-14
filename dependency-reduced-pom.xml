@@ -99,6 +99,13 @@
       <version>9.7.14.3</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>net.milkbowl.vault</groupId>
+      <artifactId>Vault</artifactId>
+      <version>1.7.3</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/Vault-1.7.4.jar</systemPath>
+    </dependency>
   </dependencies>
   <properties>
     <java.version>21</java.version>
