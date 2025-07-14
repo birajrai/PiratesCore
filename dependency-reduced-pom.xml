@@ -93,6 +93,12 @@
       <version>2.11.6</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.github.Zrips</groupId>
+      <artifactId>CMI-API</artifactId>
+      <version>9.7.14.3</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <properties>
     <java.version>21</java.version>

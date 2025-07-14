@@ -119,6 +119,7 @@
             <groupId>com.github.Zrips</groupId>
             <artifactId>CMI-API</artifactId>
             <version>9.7.14.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
