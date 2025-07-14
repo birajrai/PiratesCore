@@ -32,7 +32,9 @@ public class CommandManager {
         registerTabCompleter("oremining", oreMiningCommand);
 
         // Register pirates command
-        registerCommand("pirates", () -> new xyz.dapirates.command.PiratesCommand((xyz.dapirates.core.Core) plugin));
+        xyz.dapirates.command.PiratesCommand piratesCommand = new xyz.dapirates.command.PiratesCommand((xyz.dapirates.core.Core) plugin);
+        registerCommand("pirates", piratesCommand);
+        registerTabCompleter("pirates", piratesCommand);
     }
 
     private void registerCommand(final String name, final CommandExecutor executor) {
