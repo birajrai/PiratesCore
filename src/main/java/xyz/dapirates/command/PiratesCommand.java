@@ -40,8 +40,10 @@ public class PiratesCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 plugin.getPlayerStatsHandler().reloadConfig(plugin.getConfigManager());
-                // Also update balancetop leaderboard
+                // Save/update all tables for all online players
                 Economy econ = plugin.getEconomy();
+                plugin.getPlayerStatsHandler().saveAllOnlinePlayerStats(econ);
+                // Also update balancetop leaderboard
                 if (econ != null) {
                     List<Player> onlinePlayers = Bukkit.getOnlinePlayers().stream().collect(Collectors.toList());
                     onlinePlayers.sort(Comparator.comparingDouble(p -> econ.getBalance((OfflinePlayer)p)).reversed());
@@ -49,7 +51,7 @@ public class PiratesCommand implements CommandExecutor, TabCompleter {
                     List<Player> topPlayers = onlinePlayers.subList(0, topN);
                     plugin.getPlayerStatsHandler().updateTopBalanceLeaderboard(topPlayers, econ);
                 }
-                sender.sendMessage("§a[PiratesAddons] SQL config reloaded and tables updated!");
+                sender.sendMessage("§a[PiratesAddons] SQL config reloaded, all player stats and tables updated!");
             } catch (Exception e) {
                 sender.sendMessage("§c[PiratesAddons] Failed to update SQL: " + e.getMessage());
             }
