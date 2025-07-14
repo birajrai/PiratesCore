@@ -25,7 +25,7 @@ public class ShowCommand implements CommandExecutor {
     private static final long COOLDOWN_MILLIS = 3000;
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
             return true;
@@ -64,7 +64,7 @@ public class ShowCommand implements CommandExecutor {
         }
     }
 
-    private Component buildShowMessage(Player player, ItemStack item) {
+    private Component buildShowMessage(final Player player, final ItemStack item) {
         // Get player prefix from LuckPerms
         Component playerPrefix = getPlayerPrefix(player);
 
@@ -83,7 +83,7 @@ public class ShowCommand implements CommandExecutor {
         return message;
     }
 
-    private Component getPlayerPrefix(Player player) {
+    private Component getPlayerPrefix(final Player player) {
         try {
             LuckPerms luckPerms = LuckPermsProvider.get();
             User user = luckPerms.getUserManager().getUser(player.getUniqueId());
@@ -108,7 +108,7 @@ public class ShowCommand implements CommandExecutor {
         return Component.empty();
     }
 
-    private Component buildItemComponent(ItemStack item) {
+    private Component buildItemComponent(final ItemStack item) {
         // Get the item's display name or default name
         Component itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName()
                 ? item.displayName()
@@ -133,7 +133,7 @@ public class ShowCommand implements CommandExecutor {
         return itemName.hoverEvent(item.asHoverEvent());
     }
 
-    private Component parseLoreLine(String loreLine) {
+    private Component parseLoreLine(final String loreLine) {
         try {
             // Try MiniMessage first
             return MINI_MESSAGE.deserialize(loreLine);
