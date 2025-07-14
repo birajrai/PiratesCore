@@ -20,14 +20,14 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
     private final OreMiningListener notifier;
     private final OreMiningConfig config;
 
-    public OreMiningCommand(Core plugin, OreMiningListener notifier) {
+    public OreMiningCommand(final Core plugin, final OreMiningListener notifier) {
         this.plugin = plugin;
         this.notifier = notifier;
         this.config = new OreMiningConfig(plugin);
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (args.length == 0) {
             sender.sendMessage("§7Available commands: toggle, reload, stats, top, ignore");
             return true;
@@ -227,7 +227,7 @@ public class OreMiningCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
