@@ -3,48 +3,36 @@ package xyz.dapirates.service;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OreMiningData {
-    private final Material material;
-    private final String customMessage;
-    private final Sound customSound;
-    private final List<String> customCommands;
+    private final String message;
+    private final String sound;
     private final boolean showCoordinates;
-    private final boolean enabled;
+    private final List<String> commands;
 
-    public OreMiningData(Material material, String customMessage, Sound customSound,
-            List<String> customCommands, boolean showCoordinates, boolean enabled) {
-        this.material = material;
-        this.customMessage = customMessage;
-        this.customSound = customSound;
-        this.customCommands = customCommands;
+    public OreMiningData(final String message, final String sound, final boolean showCoordinates, final List<String> commands) {
+        this.message = message;
+        this.sound = sound;
         this.showCoordinates = showCoordinates;
-        this.enabled = enabled;
+        this.commands = new ArrayList<>(commands);
     }
 
-    public Material getMaterial() {
-        return material;
+    public String getMessage() {
+        return message;
     }
 
-    public String getCustomMessage() {
-        return customMessage;
-    }
-
-    public Sound getCustomSound() {
-        return customSound;
-    }
-
-    public List<String> getCustomCommands() {
-        return customCommands;
+    public String getSound() {
+        return sound;
     }
 
     public boolean isShowCoordinates() {
         return showCoordinates;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public List<String> getCommands() {
+        return new ArrayList<>(commands);
     }
 
     public static class Builder {
@@ -85,8 +73,7 @@ public class OreMiningData {
         }
 
         public OreMiningData build() {
-            return new OreMiningData(material, customMessage, customSound,
-                    customCommands, showCoordinates, enabled);
+            return new OreMiningData(customMessage, customSound.toString(), showCoordinates, customCommands);
         }
     }
 }
