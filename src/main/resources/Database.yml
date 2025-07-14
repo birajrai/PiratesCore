@@ -1,0 +1,6 @@
+# MySQL Database Configuration for Player Stats
+mysql:
+  host: "localhost"
+  database: "piratescore"
+  user: "root"
+  password: "" 
