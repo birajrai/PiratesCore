@@ -7,6 +7,12 @@ import java.sql.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.List;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.Statistic;
+import net.milkbowl.vault.economy.Economy;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * Handles player stats (playtime, kills, deaths, CMI balance, topbalance) in MySQL using username as the key.
@@ -285,5 +291,32 @@ public class PlayerStatsHandler {
             logger.log(Level.SEVERE, "Failed to reload MySQL config: " + e.getMessage(), e);
         }
         this.databaseAvailable = dbAvailable;
+    }
+
+    // Save all stats for all online players and update leaderboard
+    public void saveAllOnlinePlayerStats(Economy econ) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                String name = player.getName();
+                long playtimeTicks = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
+                long playtimeSeconds = playtimeTicks / 20L;
+                savePlaytimeAsync(name, playtimeSeconds);
+                // For demo, kills and deaths are not tracked in memory, so skip or load/save as needed
+                loadKillsAsync(name).thenAccept(kills -> saveKillsAsync(name, kills));
+                loadDeathsAsync(name).thenAccept(deaths -> saveDeathsAsync(name, deaths));
+                if (econ != null) {
+                    double balance = econ.getBalance(player);
+                    saveBalanceAsync(name, balance);
+                }
+            }
+            // Update balancetop leaderboard
+            if (econ != null) {
+                List<org.bukkit.entity.Player> onlinePlayers = new java.util.ArrayList<>(Bukkit.getOnlinePlayers());
+                onlinePlayers.sort(Comparator.comparingDouble(p -> econ.getBalance((org.bukkit.OfflinePlayer)p)).reversed());
+                int topN = Math.min(10, onlinePlayers.size());
+                List<org.bukkit.entity.Player> topPlayers = onlinePlayers.subList(0, topN);
+                updateTopBalanceLeaderboard(topPlayers, econ);
+            }
+        });
     }
 } 
