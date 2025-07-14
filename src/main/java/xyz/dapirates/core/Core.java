@@ -23,7 +23,6 @@ public class Core extends JavaPlugin {
     private WebhookManager webhookManager;
     private OreMiningWebhook oreMiningWebhook;
     private ConfigManager configManager;
-    private ChatFilterListener chatFilterListener;
 
     @Override
     public void onEnable() {
@@ -103,10 +102,6 @@ public class Core extends JavaPlugin {
 
     public ConfigManager getConfigManager() {
         return configManager;
-    }
-
-    public ChatFilterListener getChatFilterListener() {
-        return featureManager.getChatFilterListener();
     }
 
     public FeatureManager getFeatureManager() {
