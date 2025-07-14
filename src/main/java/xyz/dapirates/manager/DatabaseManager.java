@@ -11,6 +11,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+/**
+ * Handles all database operations for ore mining statistics and player data.
+ * Uses H2 embedded database and caches player stats in memory.
+ */
 public class DatabaseManager {
 
     private final Core plugin;
@@ -18,6 +22,10 @@ public class DatabaseManager {
     private final Map<UUID, OreMiningStats> cache;
     private final boolean databaseAvailable;
 
+    /**
+     * Constructs a DatabaseManager for the plugin, initializing the H2 database.
+     * @param plugin The main plugin instance
+     */
     public DatabaseManager(Core plugin) {
         this.plugin = plugin;
         this.cache = new ConcurrentHashMap<>();
@@ -122,6 +130,11 @@ public class DatabaseManager {
         });
     }
 
+    /**
+     * Loads player stats from the database asynchronously.
+     * @param playerId The player's UUID
+     * @return CompletableFuture for OreMiningStats
+     */
     public CompletableFuture<OreMiningStats> loadPlayerStatsAsync(UUID playerId) {
         if (!databaseAvailable) {
             return CompletableFuture.completedFuture(null);
@@ -199,6 +212,11 @@ public class DatabaseManager {
         });
     }
 
+    /**
+     * Saves a mining session to the database asynchronously.
+     * @param playerId The player's UUID
+     * @param minedBlocks The blocks mined in the session
+     */
     public CompletableFuture<Void> saveOreMiningSessionAsync(UUID playerId, Map<Material, Integer> minedBlocks) {
         if (!databaseAvailable) {
             return CompletableFuture.completedFuture(null);
@@ -386,6 +404,9 @@ public class DatabaseManager {
         return "Unknown";
     }
 
+    /**
+     * Closes the database connection and clears the cache.
+     */
     public void close() {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
             // H2 will close automatically when the last connection is closed
@@ -407,6 +428,10 @@ public class DatabaseManager {
         cache.remove(playerId);
     }
 
+    /**
+     * Checks if the database is available and initialized.
+     * @return true if available, false otherwise
+     */
     public boolean isDatabaseAvailable() {
         return databaseAvailable;
     }
