@@ -23,6 +23,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Listens for ore mining events, manages mining sessions, and handles notifications and commands.
+ */
 public class OreMiningListener implements Listener {
 
     private final Core plugin;
@@ -46,6 +49,9 @@ public class OreMiningListener implements Listener {
         loadIgnoredPlayers();
     }
 
+    /**
+     * Handles block break events for ore mining tracking.
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
@@ -88,6 +94,9 @@ public class OreMiningListener implements Listener {
         // No DB write here
     }
 
+    /**
+     * Handles TNT mining events (EntityExplodeEvent).
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityExplode(EntityExplodeEvent event) {
         if (!config.isTNTMiningEnabled()) {
@@ -111,6 +120,9 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Handles player join events (for future extensibility).
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         // No stats to initialize
@@ -121,6 +133,9 @@ public class OreMiningListener implements Listener {
         // }
     }
 
+    /**
+     * Handles player quit events, flushing mining sessions to the database.
+     */
     @EventHandler
     public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -131,10 +146,16 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Sends an ore mining notification to players and console.
+     */
     private void sendOreMiningNotification(Player miner, Material material, Location location) {
         sendOreMiningNotification(miner, material, location, false);
     }
 
+    /**
+     * Sends an ore mining notification, specifying if TNT was used.
+     */
     private void sendOreMiningNotification(Player miner, Material material, Location location, boolean isTNT) {
         String message = config.getCustomMessage(material, miner, location, isTNT);
         Sound sound = config.getCustomSound(material);
@@ -172,26 +193,24 @@ public class OreMiningListener implements Listener {
         });
     }
 
+    /**
+     * Executes custom commands configured for a mined block.
+     */
     private void executeCustomCommands(Player player, Material material, Location location) {
         List<String> commands = config.getCustomCommands(material);
 
         for (String command : commands) {
-            String processedCommand = command
-                    .replace("{player}", player.getName())
-                    .replace("{block}", material.name())
-                    .replace("{x}", String.valueOf(location.getBlockX()))
-                    .replace("{y}", String.valueOf(location.getBlockY()))
-                    .replace("{z}", String.valueOf(location.getBlockZ()))
-                    .replace("{world}", location.getWorld().getName());
-
+            String processedCommand = messageManager.processPlaceholders(player, command, material, location, false);
             if (processedCommand.startsWith("/")) {
                 processedCommand = processedCommand.substring(1);
             }
-
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
         }
     }
 
+    /**
+     * Returns a pretty display name for an ore material.
+     */
     private String getPrettyOreName(org.bukkit.Material material) {
         switch (material) {
             case DIAMOND_ORE:
@@ -228,6 +247,9 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Finds the nearest player to a given location.
+     */
     private Player findNearestPlayer(Location location) {
         Player nearestPlayer = null;
         double nearestDistance = Double.MAX_VALUE;
@@ -243,6 +265,9 @@ public class OreMiningListener implements Listener {
         return nearestPlayer;
     }
 
+    /**
+     * Handles delayed notification logic for mining sessions.
+     */
     private void handleDelayedNotification(Player player, Material material, org.bukkit.Location location) {
         UUID playerId = player.getUniqueId();
 
@@ -266,6 +291,9 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Sends a delayed notification for a mining session.
+     */
     private void sendDelayedNotification(Player player, MiningSession session) {
         if (!session.hasMinedBlocks()) {
             return;
@@ -314,6 +342,9 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Creates a batched message for a mining session.
+     */
     private String createBatchedMessage(Player player, Map<Material, Integer> minedBlocks, int totalBlocks,
             long sessionDuration) {
         StringBuilder message = new StringBuilder();
@@ -348,6 +379,9 @@ public class OreMiningListener implements Listener {
         return message.toString();
     }
 
+    /**
+     * Creates an individual message for a mined block.
+     */
     private String createIndividualMessage(Player player, Material material, int count, long sessionDuration) {
         String blockName = material.name().replace("_", " ");
         String message = "§a[OreMining] §f" + player.getName() + " mined §e" + count + "x §f" + blockName;
@@ -365,6 +399,9 @@ public class OreMiningListener implements Listener {
         return message;
     }
 
+    /**
+     * Loads ignored players from config.
+     */
     private void loadIgnoredPlayers() {
         List<String> ignoredNames = config.getIgnoredPlayers();
         for (String name : ignoredNames) {
@@ -376,6 +413,9 @@ public class OreMiningListener implements Listener {
     }
 
     // Public methods for commands
+    /**
+     * Toggles notifications for a player.
+     */
     public void toggleNotifications(Player player) {
         UUID playerId = player.getUniqueId();
         if (toggledOffPlayers.contains(playerId)) {
@@ -387,26 +427,41 @@ public class OreMiningListener implements Listener {
         }
     }
 
+    /**
+     * Adds a player to the ignore list.
+     */
     public void addToIgnore(Player player) {
         ignoredPlayers.add(player.getUniqueId());
         config.addIgnoredPlayer(player.getName());
         player.sendMessage("§a[OreMining] §fAdded to ignore list.");
     }
 
+    /**
+     * Removes a player from the ignore list.
+     */
     public void removeFromIgnore(Player player) {
         ignoredPlayers.remove(player.getUniqueId());
         config.removeIgnoredPlayer(player.getName());
         player.sendMessage("§a[OreMining] §fRemoved from ignore list.");
     }
 
+    /**
+     * Checks if a player is ignored.
+     */
     public boolean isPlayerIgnored(UUID playerId) {
         return ignoredPlayers.contains(playerId);
     }
 
+    /**
+     * Checks if a player has toggled off notifications.
+     */
     public boolean isPlayerToggledOff(UUID playerId) {
         return toggledOffPlayers.contains(playerId);
     }
 
+    /**
+     * Flushes all mining sessions to the database (e.g., on server stop).
+     */
     public void flushAllMiningSessionsToStats() {
         // On server stop, save all sessions to DB asynchronously
         for (Map.Entry<UUID, MiningSession> entry : miningSessions.entrySet()) {
@@ -419,6 +474,9 @@ public class OreMiningListener implements Listener {
         miningSessions.clear();
     }
 
+    /**
+     * Saves a mining session asynchronously.
+     */
     private void saveSessionAsync(UUID playerId, MiningSession session) {
         // Save the session data to H2 asynchronously
         if (databaseManager != null && databaseManager.isDatabaseAvailable()) {
