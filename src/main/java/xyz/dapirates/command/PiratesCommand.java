@@ -23,7 +23,21 @@ public class PiratesCommand implements CommandExecutor {
             sender.sendMessage("§a[PiratesAddons] All configs reloaded!");
             return true;
         }
-        sender.sendMessage("§7Usage: /pirates reload");
+        if (args.length > 0 && args[0].equalsIgnoreCase("updatesql")) {
+            if (!sender.hasPermission("pirates.updatesql")) {
+                sender.sendMessage("§cYou don't have permission to use this command!");
+                return true;
+            }
+            try {
+                plugin.getPlayerStatsHandler().reloadConfig(plugin.getConfigManager());
+                // Optionally, re-initialize tables
+                sender.sendMessage("§a[PiratesAddons] SQL config reloaded and tables updated!");
+            } catch (Exception e) {
+                sender.sendMessage("§c[PiratesAddons] Failed to update SQL: " + e.getMessage());
+            }
+            return true;
+        }
+        sender.sendMessage("§7Usage: /pirates reload | /pirates updatesql");
         return true;
     }
 }
