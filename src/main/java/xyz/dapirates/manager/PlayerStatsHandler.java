@@ -79,12 +79,6 @@ public class PlayerStatsHandler {
                     username VARCHAR(32) NOT NULL,
                     count INT NOT NULL
                 )""";
-            String leaveTop = """
-                CREATE TABLE IF NOT EXISTS player_leave_top (
-                    id INT PRIMARY KEY,
-                    username VARCHAR(32) NOT NULL,
-                    count INT NOT NULL
-                )""";
             String boatTop = """
                 CREATE TABLE IF NOT EXISTS player_boat_top (
                     id INT PRIMARY KEY,
@@ -104,7 +98,6 @@ public class PlayerStatsHandler {
                 stmt.execute(balance);
                 stmt.execute(topbalance);
                 stmt.execute(joinTop);
-                stmt.execute(leaveTop);
                 stmt.execute(boatTop);
                 stmt.execute(leaveBoatTop);
             }
@@ -262,10 +255,6 @@ public class PlayerStatsHandler {
     public CompletableFuture<Void> saveJoinCountAsync(String username, int count) {
         return saveGenericTopAsync("player_join_top", username, count);
     }
-    // Save leave count for a player
-    public CompletableFuture<Void> saveLeaveCountAsync(String username, int count) {
-        return saveGenericTopAsync("player_leave_top", username, count);
-    }
     // Save boat mount count for a player
     public CompletableFuture<Void> saveBoatCountAsync(String username, int count) {
         return saveGenericTopAsync("player_boat_top", username, count);
@@ -421,7 +410,6 @@ public class PlayerStatsHandler {
     public void saveAllOnlinePlayerStats(Economy econ) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             java.util.Map<String, Integer> joinCounts = new java.util.HashMap<>();
-            java.util.Map<String, Integer> leaveCounts = new java.util.HashMap<>();
             java.util.Map<String, Integer> boatCounts = new java.util.HashMap<>();
             java.util.Map<String, Integer> leaveBoatCounts = new java.util.HashMap<>();
             for (Player player : Bukkit.getOnlinePlayers()) {
@@ -436,13 +424,11 @@ public class PlayerStatsHandler {
                     saveBalanceAsync(name, balance);
                 }
                 // For demo, increment all counts by 1 each time
-                int join = 1, leave = 1, boat = 1, leaveBoat = 1;
+                int join = 1, boat = 1, leaveBoat = 1;
                 saveJoinCountAsync(name, join);
-                saveLeaveCountAsync(name, leave);
                 saveBoatCountAsync(name, boat);
                 saveLeaveBoatCountAsync(name, leaveBoat);
                 joinCounts.put(name, join);
-                leaveCounts.put(name, leave);
                 boatCounts.put(name, boat);
                 leaveBoatCounts.put(name, leaveBoat);
             }
@@ -455,7 +441,6 @@ public class PlayerStatsHandler {
                 updateTopBalanceLeaderboard(topPlayers, econ);
                 // Update all other top leaderboards (for demo, use same top 10 as balance)
                 updateGenericTopLeaderboard("player_join_top", topPlayers, joinCounts);
-                updateGenericTopLeaderboard("player_leave_top", topPlayers, leaveCounts);
                 updateGenericTopLeaderboard("player_boat_top", topPlayers, boatCounts);
                 updateGenericTopLeaderboard("player_leave_boat_top", topPlayers, leaveBoatCounts);
             }
