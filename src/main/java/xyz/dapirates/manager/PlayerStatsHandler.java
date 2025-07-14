@@ -73,12 +73,40 @@ public class PlayerStatsHandler {
                     username VARCHAR(32) NOT NULL,
                     topbalance DOUBLE NOT NULL
                 )""";
+            String joinTop = """
+                CREATE TABLE IF NOT EXISTS player_join_top (
+                    id INT PRIMARY KEY,
+                    username VARCHAR(32) NOT NULL,
+                    count INT NOT NULL
+                )""";
+            String leaveTop = """
+                CREATE TABLE IF NOT EXISTS player_leave_top (
+                    id INT PRIMARY KEY,
+                    username VARCHAR(32) NOT NULL,
+                    count INT NOT NULL
+                )""";
+            String boatTop = """
+                CREATE TABLE IF NOT EXISTS player_boat_top (
+                    id INT PRIMARY KEY,
+                    username VARCHAR(32) NOT NULL,
+                    count INT NOT NULL
+                )""";
+            String leaveBoatTop = """
+                CREATE TABLE IF NOT EXISTS player_leave_boat_top (
+                    id INT PRIMARY KEY,
+                    username VARCHAR(32) NOT NULL,
+                    count INT NOT NULL
+                )""";
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute(playtime);
                 stmt.execute(kills);
                 stmt.execute(deaths);
                 stmt.execute(balance);
                 stmt.execute(topbalance);
+                stmt.execute(joinTop);
+                stmt.execute(leaveTop);
+                stmt.execute(boatTop);
+                stmt.execute(leaveBoatTop);
             }
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to create player stats tables", e);
@@ -185,6 +213,102 @@ public class PlayerStatsHandler {
                 ps.executeUpdate();
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Failed to save topbalance for " + username, e);
+            }
+        });
+    }
+
+    // Save join/leave count for a player
+    public CompletableFuture<Void> saveJoinLeaveCountAsync(String username, int count) {
+        return CompletableFuture.runAsync(() -> {
+            String sql = "REPLACE INTO player_join_leave_top (id, username, count) VALUES (?, ?, ?)";
+            logger.info("Executing SQL: " + sql + " [username=" + username + ", count=" + count + "]");
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                // id is 0 for direct save, leaderboard will set real id
+                ps.setInt(1, 0);
+                ps.setString(2, username);
+                ps.setInt(3, count);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to save join/leave count for " + username, e);
+            }
+        });
+    }
+
+    // Update the join/leave top 10 leaderboard
+    public void updateJoinLeaveTopLeaderboard(List<org.bukkit.entity.Player> topPlayers, java.util.Map<String, Integer> joinLeaveCounts) {
+        CompletableFuture.runAsync(() -> {
+            String clearSql = "DELETE FROM player_join_leave_top";
+            String insertSql = "INSERT INTO player_join_leave_top (id, username, count) VALUES (?, ?, ?)";
+            try (Connection conn = getConnection(); Statement clearStmt = conn.createStatement()) {
+                clearStmt.executeUpdate(clearSql);
+                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                    for (int i = 0; i < topPlayers.size(); i++) {
+                        org.bukkit.entity.Player p = topPlayers.get(i);
+                        int count = joinLeaveCounts.getOrDefault(p.getName(), 0);
+                        ps.setInt(1, i + 1); // id 1-10
+                        ps.setString(2, p.getName());
+                        ps.setInt(3, count);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to update join/leave top leaderboard", e);
+            }
+        });
+    }
+
+    // Save join count for a player
+    public CompletableFuture<Void> saveJoinCountAsync(String username, int count) {
+        return saveGenericTopAsync("player_join_top", username, count);
+    }
+    // Save leave count for a player
+    public CompletableFuture<Void> saveLeaveCountAsync(String username, int count) {
+        return saveGenericTopAsync("player_leave_top", username, count);
+    }
+    // Save boat mount count for a player
+    public CompletableFuture<Void> saveBoatCountAsync(String username, int count) {
+        return saveGenericTopAsync("player_boat_top", username, count);
+    }
+    // Save boat leave count for a player
+    public CompletableFuture<Void> saveLeaveBoatCountAsync(String username, int count) {
+        return saveGenericTopAsync("player_leave_boat_top", username, count);
+    }
+    // Generic async save for top tables
+    private CompletableFuture<Void> saveGenericTopAsync(String table, String username, int count) {
+        return CompletableFuture.runAsync(() -> {
+            String sql = "REPLACE INTO " + table + " (id, username, count) VALUES (?, ?, ?)";
+            logger.info("Executing SQL: " + sql + " [username=" + username + ", count=" + count + "]");
+            try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, 0);
+                ps.setString(2, username);
+                ps.setInt(3, count);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to save count for " + username + " in " + table, e);
+            }
+        });
+    }
+    // Update a generic top 10 leaderboard
+    public void updateGenericTopLeaderboard(String table, List<org.bukkit.entity.Player> topPlayers, java.util.Map<String, Integer> counts) {
+        CompletableFuture.runAsync(() -> {
+            String clearSql = "DELETE FROM " + table;
+            String insertSql = "INSERT INTO " + table + " (id, username, count) VALUES (?, ?, ?)";
+            try (Connection conn = getConnection(); Statement clearStmt = conn.createStatement()) {
+                clearStmt.executeUpdate(clearSql);
+                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                    for (int i = 0; i < topPlayers.size(); i++) {
+                        org.bukkit.entity.Player p = topPlayers.get(i);
+                        int count = counts.getOrDefault(p.getName(), 0);
+                        ps.setInt(1, i + 1); // id 1-10
+                        ps.setString(2, p.getName());
+                        ps.setInt(3, count);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to update leaderboard for " + table, e);
             }
         });
     }
@@ -296,18 +420,31 @@ public class PlayerStatsHandler {
     // Save all stats for all online players and update leaderboard
     public void saveAllOnlinePlayerStats(Economy econ) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            java.util.Map<String, Integer> joinCounts = new java.util.HashMap<>();
+            java.util.Map<String, Integer> leaveCounts = new java.util.HashMap<>();
+            java.util.Map<String, Integer> boatCounts = new java.util.HashMap<>();
+            java.util.Map<String, Integer> leaveBoatCounts = new java.util.HashMap<>();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 String name = player.getName();
                 long playtimeTicks = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
                 long playtimeSeconds = playtimeTicks / 20L;
                 savePlaytimeAsync(name, playtimeSeconds);
-                // For demo, kills and deaths are not tracked in memory, so skip or load/save as needed
                 loadKillsAsync(name).thenAccept(kills -> saveKillsAsync(name, kills));
                 loadDeathsAsync(name).thenAccept(deaths -> saveDeathsAsync(name, deaths));
                 if (econ != null) {
                     double balance = econ.getBalance(player);
                     saveBalanceAsync(name, balance);
                 }
+                // For demo, increment all counts by 1 each time
+                int join = 1, leave = 1, boat = 1, leaveBoat = 1;
+                saveJoinCountAsync(name, join);
+                saveLeaveCountAsync(name, leave);
+                saveBoatCountAsync(name, boat);
+                saveLeaveBoatCountAsync(name, leaveBoat);
+                joinCounts.put(name, join);
+                leaveCounts.put(name, leave);
+                boatCounts.put(name, boat);
+                leaveBoatCounts.put(name, leaveBoat);
             }
             // Update balancetop leaderboard
             if (econ != null) {
@@ -316,6 +453,11 @@ public class PlayerStatsHandler {
                 int topN = Math.min(10, onlinePlayers.size());
                 List<org.bukkit.entity.Player> topPlayers = onlinePlayers.subList(0, topN);
                 updateTopBalanceLeaderboard(topPlayers, econ);
+                // Update all other top leaderboards (for demo, use same top 10 as balance)
+                updateGenericTopLeaderboard("player_join_top", topPlayers, joinCounts);
+                updateGenericTopLeaderboard("player_leave_top", topPlayers, leaveCounts);
+                updateGenericTopLeaderboard("player_boat_top", topPlayers, boatCounts);
+                updateGenericTopLeaderboard("player_leave_boat_top", topPlayers, leaveBoatCounts);
             }
         });
     }
