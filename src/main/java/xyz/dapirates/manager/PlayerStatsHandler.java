@@ -6,6 +6,7 @@ import xyz.dapirates.manager.ConfigManager;
 import java.sql.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
+import java.util.List;
 
 /**
  * Handles player stats (playtime, kills, deaths, CMI balance, topbalance) in MySQL using username as the key.
@@ -62,7 +63,8 @@ public class PlayerStatsHandler {
                 )""";
             String topbalance = """
                 CREATE TABLE IF NOT EXISTS player_cmi_topbalance (
-                    username VARCHAR(32) PRIMARY KEY,
+                    id INT PRIMARY KEY,
+                    username VARCHAR(32) NOT NULL,
                     topbalance DOUBLE NOT NULL
                 )""";
             try (Statement stmt = conn.createStatement()) {
@@ -141,13 +143,39 @@ public class PlayerStatsHandler {
         });
     }
 
+    // Update the balancetop leaderboard in the database for the top 10 players
+    public void updateTopBalanceLeaderboard(List<org.bukkit.entity.Player> topPlayers, net.milkbowl.vault.economy.Economy econ) {
+        CompletableFuture.runAsync(() -> {
+            String clearSql = "DELETE FROM player_cmi_topbalance";
+            String insertSql = "INSERT INTO player_cmi_topbalance (id, username, topbalance) VALUES (?, ?, ?)";
+            try (Connection conn = getConnection(); Statement clearStmt = conn.createStatement()) {
+                clearStmt.executeUpdate(clearSql);
+                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                    for (int i = 0; i < topPlayers.size(); i++) {
+                        org.bukkit.entity.Player p = topPlayers.get(i);
+                        ps.setInt(1, i + 1); // id 1-10
+                        ps.setString(2, p.getName());
+                        ps.setDouble(3, econ.getBalance(p));
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to update balancetop leaderboard", e);
+            }
+        });
+    }
+
+    // Deprecated: use updateTopBalanceLeaderboard for leaderboard
     public CompletableFuture<Void> saveTopBalanceAsync(String username, double topbalance) {
         return CompletableFuture.runAsync(() -> {
-            String sql = "REPLACE INTO player_cmi_topbalance (username, topbalance) VALUES (?, ?)";
+            String sql = "REPLACE INTO player_cmi_topbalance (id, username, topbalance) VALUES (?, ?, ?)";
             logger.info("Executing SQL: " + sql + " [username=" + username + ", topbalance=" + topbalance + "]");
             try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, username);
-                ps.setDouble(2, topbalance);
+                // This method is deprecated for leaderboard, but keep id as 0 for legacy
+                ps.setInt(1, 0);
+                ps.setString(2, username);
+                ps.setDouble(3, topbalance);
                 ps.executeUpdate();
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Failed to save topbalance for " + username, e);
