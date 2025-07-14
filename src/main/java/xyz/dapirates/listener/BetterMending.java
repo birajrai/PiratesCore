@@ -15,8 +15,8 @@ import org.bukkit.inventory.meta.Damageable;
 
 public class BetterMending implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
-    public void onItemUse(PlayerInteractEvent e) {
-        Player player = e.getPlayer();
+    public void onItemUse(final PlayerInteractEvent e) {
+        final Player player = e.getPlayer();
         if (!player.hasPermission("pc.bettermending.use") ||
                 player.getGameMode() == GameMode.SPECTATOR ||
                 player.getGameMode() == GameMode.CREATIVE)
