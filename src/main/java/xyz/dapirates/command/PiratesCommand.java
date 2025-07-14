@@ -3,9 +3,19 @@ package xyz.dapirates.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import xyz.dapirates.core.Core;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import net.milkbowl.vault.economy.Economy;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import org.bukkit.OfflinePlayer;
 
-public class PiratesCommand implements CommandExecutor {
+public class PiratesCommand implements CommandExecutor, TabCompleter {
     private final Core plugin;
 
     public PiratesCommand(final Core plugin) {
@@ -30,7 +40,15 @@ public class PiratesCommand implements CommandExecutor {
             }
             try {
                 plugin.getPlayerStatsHandler().reloadConfig(plugin.getConfigManager());
-                // Optionally, re-initialize tables
+                // Also update balancetop leaderboard
+                Economy econ = plugin.getEconomy();
+                if (econ != null) {
+                    List<Player> onlinePlayers = Bukkit.getOnlinePlayers().stream().collect(Collectors.toList());
+                    onlinePlayers.sort(Comparator.comparingDouble(p -> econ.getBalance((OfflinePlayer)p)).reversed());
+                    int topN = Math.min(10, onlinePlayers.size());
+                    List<Player> topPlayers = onlinePlayers.subList(0, topN);
+                    plugin.getPlayerStatsHandler().updateTopBalanceLeaderboard(topPlayers, econ);
+                }
                 sender.sendMessage("§a[PiratesAddons] SQL config reloaded and tables updated!");
             } catch (Exception e) {
                 sender.sendMessage("§c[PiratesAddons] Failed to update SQL: " + e.getMessage());
@@ -39,5 +57,13 @@ public class PiratesCommand implements CommandExecutor {
         }
         sender.sendMessage("§7Usage: /pirates reload | /pirates updatesql");
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            return Arrays.asList("reload", "updatesql");
+        }
+        return Collections.emptyList();
     }
 }
