@@ -1,1 +1,0 @@
- mv target/piratescore-1.0.jar ~/Documents/testserver/plugins/piratescore-1.0.jar
