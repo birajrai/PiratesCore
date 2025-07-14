@@ -16,13 +16,13 @@ public class CommandManager {
     private final Map<String, CommandExecutor> commands;
     private final Map<String, TabCompleter> tabCompleters;
 
-    public CommandManager(JavaPlugin plugin) {
+    public CommandManager(final JavaPlugin plugin) {
         this.plugin = plugin;
         this.commands = new HashMap<>();
         this.tabCompleters = new HashMap<>();
     }
 
-    public void registerCommands(OreMiningListener oreMiningListener) {
+    public void registerCommands(final OreMiningListener oreMiningListener) {
         // Register commands using a more abstract approach
         registerCommand("show", ShowCommand::new);
         
@@ -35,26 +35,26 @@ public class CommandManager {
         registerCommand("pirates", () -> new xyz.dapirates.command.PiratesCommand((xyz.dapirates.core.Core) plugin));
     }
 
-    private void registerCommand(String name, CommandExecutor executor) {
+    private void registerCommand(final String name, final CommandExecutor executor) {
         commands.put(name, executor);
         plugin.getCommand(name).setExecutor(executor);
     }
 
-    private void registerCommand(String name, Supplier<CommandExecutor> executorSupplier) {
+    private void registerCommand(final String name, final Supplier<CommandExecutor> executorSupplier) {
         CommandExecutor executor = executorSupplier.get();
         registerCommand(name, executor);
     }
 
-    private void registerTabCompleter(String name, TabCompleter completer) {
+    private void registerTabCompleter(final String name, final TabCompleter completer) {
         tabCompleters.put(name, completer);
         plugin.getCommand(name).setTabCompleter(completer);
     }
 
-    public CommandExecutor getCommand(String name) {
+    public CommandExecutor getCommand(final String name) {
         return commands.get(name);
     }
 
-    public TabCompleter getTabCompleter(String name) {
+    public TabCompleter getTabCompleter(final String name) {
         return tabCompleters.get(name);
     }
 
