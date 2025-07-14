@@ -9,7 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import xyz.dapirates.listener.ChatFilterListener;
+import xyz.dapirates.utils.ConfigUtils;
 
+/**
+ * Manages feature registration and toggling based on Settings.yml configuration.
+ */
 public class FeatureManager {
 
     private final JavaPlugin plugin;
@@ -22,20 +26,27 @@ public class FeatureManager {
         this.features = new HashMap<>();
     }
 
+    /**
+     * Loads the Settings.yml configuration file.
+     */
     private void loadSettings() {
-        File settingsFile = new File(plugin.getDataFolder(), "Settings.yml");
-        if (!settingsFile.exists()) {
-            plugin.saveResource("Settings.yml", false);
-        }
-        settingsConfig = YamlConfiguration.loadConfiguration(settingsFile);
+        settingsConfig = (org.bukkit.configuration.file.YamlConfiguration) ConfigUtils.loadConfig(plugin, "Settings.yml");
     }
 
+    /**
+     * Checks if a feature is enabled in the config.
+     * @param featureName The feature name
+     * @return true if enabled, false otherwise
+     */
     public boolean isFeatureEnabled(String featureName) {
         if (settingsConfig == null)
             loadSettings();
         return settingsConfig.getBoolean("features." + featureName, true);
     }
 
+    /**
+     * Registers all features based on config toggles.
+     */
     public void registerFeatures() {
         loadSettings();
         // Log all features and their status
@@ -62,16 +73,25 @@ public class FeatureManager {
         }
     }
 
+    /**
+     * Registers a feature by name and instance.
+     */
     private void registerFeature(String name, Object feature) {
         features.put(name, feature);
         plugin.getServer().getPluginManager().registerEvents((org.bukkit.event.Listener) feature, plugin);
     }
 
+    /**
+     * Registers a feature by name and supplier.
+     */
     private void registerFeature(String name, Supplier<Object> featureSupplier) {
         Object feature = featureSupplier.get();
         registerFeature(name, feature);
     }
 
+    /**
+     * Gets a registered feature by name and type.
+     */
     public <T> T getFeature(String name, Class<T> type) {
         Object feature = features.get(name);
         if (type.isInstance(feature)) {
@@ -80,22 +100,37 @@ public class FeatureManager {
         return null;
     }
 
+    /**
+     * Gets the registered OreMiningListener.
+     */
     public OreMiningListener getOreMiningListener() {
         return getFeature("oremining", OreMiningListener.class);
     }
 
+    /**
+     * Gets the registered BetterMending listener.
+     */
     public BetterMending getBetterMending() {
         return getFeature("bettermending", BetterMending.class);
     }
 
+    /**
+     * Gets the registered ChatFilterListener.
+     */
     public ChatFilterListener getChatFilterListener() {
         return getFeature("chatfilter", ChatFilterListener.class);
     }
 
+    /**
+     * Unregisters all features.
+     */
     public void unregisterAll() {
         features.clear();
     }
 
+    /**
+     * Reloads the Settings.yml configuration.
+     */
     public void reloadSettings() {
         loadSettings();
     }
