@@ -12,6 +12,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import xyz.dapirates.core.Core;
 import xyz.dapirates.manager.PlayerStatsHandler;
 import net.milkbowl.vault.economy.Economy;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bukkit.OfflinePlayer;
 
 public class PlayerStatsListener implements Listener {
     private final Core plugin;
@@ -35,6 +39,7 @@ public class PlayerStatsListener implements Listener {
         if (econ != null) {
             double balance = econ.getBalance(player);
             statsHandler.saveBalanceAsync(player.getName(), balance);
+            updateBalanceTop(econ);
         }
     }
 
@@ -46,8 +51,7 @@ public class PlayerStatsListener implements Listener {
         if (econ != null) {
             double balance = econ.getBalance(player);
             statsHandler.saveBalanceAsync(player.getName(), balance);
-            // For demo, use balance as topbalance (real balancetop would require leaderboard logic)
-            statsHandler.saveTopBalanceAsync(player.getName(), balance);
+            updateBalanceTop(econ);
         }
     }
 
@@ -76,5 +80,14 @@ public class PlayerStatsListener implements Listener {
     // Stub: Save CMI topbalance (call this from your CMI integration)
     public void saveTopBalance(Player player, double topbalance) {
         statsHandler.saveTopBalanceAsync(player.getName(), topbalance);
+    }
+
+    // Update the balancetop leaderboard in the database for the top 10 players
+    private void updateBalanceTop(Economy econ) {
+        List<Player> onlinePlayers = Bukkit.getOnlinePlayers().stream().collect(Collectors.toList());
+        onlinePlayers.sort(Comparator.comparingDouble(p -> econ.getBalance((OfflinePlayer)p)).reversed());
+        int topN = Math.min(10, onlinePlayers.size());
+        List<Player> topPlayers = onlinePlayers.subList(0, topN);
+        statsHandler.updateTopBalanceLeaderboard(topPlayers, econ);
     }
 } 
