@@ -1,1 +1,1 @@
- rm -rf ~/Documents/Testing\ Server/plugins/piratescore-1.0.jar && mvn clean package && mv target/piratescore-1.0.jar ~/Documents/Testing\ Server/plugins/piratescore-1.0.jar
+ mv target/piratescore-1.0.jar ~/Documents/testserver/plugins/piratescore-1.0.jar
