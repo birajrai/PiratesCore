@@ -11,6 +11,9 @@ import xyz.dapirates.manager.WebhookManager;
 import xyz.dapirates.manager.OreMiningWebhook;
 import xyz.dapirates.manager.ConfigManager;
 import xyz.dapirates.utils.OreMiningConfig;
+import xyz.dapirates.manager.PlayerStatsHandler;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class Core extends JavaPlugin {
 
@@ -23,9 +26,15 @@ public class Core extends JavaPlugin {
     private WebhookManager webhookManager;
     private OreMiningWebhook oreMiningWebhook;
     private ConfigManager configManager;
+    private PlayerStatsHandler playerStatsHandler;
+    private Economy economy;
 
     @Override
     public void onEnable() {
+        // Setup Vault economy
+        if (!setupEconomy()) {
+            getLogger().severe("Vault with an economy plugin is required for balance tracking!");
+        }
         // Initialize managers
         initializeManagers();
 
@@ -34,6 +43,9 @@ public class Core extends JavaPlugin {
 
         // Register commands
         commandManager.registerCommands(oreMiningListener);
+
+        // Register player stats listener
+        getServer().getPluginManager().registerEvents(new xyz.dapirates.listener.PlayerStatsListener(this), this);
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
@@ -74,6 +86,26 @@ public class Core extends JavaPlugin {
 
         // Initialize ore mining feature after managers
         oreMiningListener = new OreMiningListener(this);
+
+        // Initialize player stats handler (replace with config values)
+        // TODO: Load these values from a config file
+        playerStatsHandler = new PlayerStatsHandler(this, configManager);
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        economy = rsp.getProvider();
+        return economy != null;
+    }
+
+    public Economy getEconomy() {
+        return economy;
     }
 
     public OreMiningListener getOreMiningListener() {
@@ -106,5 +138,9 @@ public class Core extends JavaPlugin {
 
     public FeatureManager getFeatureManager() {
         return featureManager;
+    }
+
+    public PlayerStatsHandler getPlayerStatsHandler() {
+        return playerStatsHandler;
     }
 }
