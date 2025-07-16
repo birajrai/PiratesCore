@@ -6,6 +6,8 @@
 
 > ⚓️ Supercharge your Minecraft server with modular features, smart mining alerts, and seamless Discord integration—all in one plugin!
 
+---
+
 ## Overview
 - Modular Minecraft plugin for Spigot/Paper servers
 - Advanced ore mining notifications (real-time and batched)
@@ -17,42 +19,55 @@
 
 ---
 
+## Unique Features
+- **Real-Time & Batched Ore Alerts:** Instantly notify admins or Discord when rare ores are mined, with support for delayed/batched notifications.
+- **Discord Webhook Integration:** Send rich, customizable mining alerts directly to Discord channels.
+- **Player Mining Stats:** Track, display, and rank player mining activity with `/oremining stats` and `/oremining top`.
+- **In-Game Config Reload:** Instantly reload all configs and chat filters with `/pirates reload`—no server restart needed.
+- **Better Mending:** Repair items using XP with a simple action.
+- **Chat Filtering:** Replace bad words in chat using a YAML-configurable list, with optional Discord logging.
+- **Extensible Feature System:** Easily add or toggle features via `Settings.yml` and the `FeatureManager`.
+- **Async Database & Webhook Operations:** All heavy operations are async to keep your server lag-free.
+
+---
+
 ## Features
-- **Ore Mining Notifications:** Real-time and batched alerts for rare ore mining, with Discord webhook support.
-- **Mining Statistics:** Tracks and displays player mining stats, top miners, and session summaries.
-- **Chat Filtering:** Replaces bad words in chat using a configurable YAML list.
-- **Better Mending:** Allows players to repair items using XP with a simple action.
-- **Config Reloading:** Reload all configs in-game without restarting the server.
-- **Extensible:** Easily add new features or listeners via the FeatureManager.
+- **Ore Mining Notifications:**
+  - Real-time and batched alerts for rare ore mining
+  - Discord webhook support with rich embeds
+  - Customizable tracked blocks, thresholds, and messages
+- **Mining Statistics:**
+  - Tracks player mining stats and top miners
+  - Session summaries and leaderboards
+- **Chat Filtering:**
+  - Configurable bad words list (`BadWords.yml`)
+  - Optional Discord webhook for flagged messages
+- **Better Mending:**
+  - Repair items with XP
+- **Config Reloading:**
+  - Reload all configs in-game with `/pirates reload`
+- **Extensible:**
+  - Add new features/listeners via `FeatureManager` and `Settings.yml`
 
 ---
 
-## Quickstart / Installation
-1. **Download** the latest PiratesCore JAR and place it in your server's `plugins/` directory.
-2. **Dependencies:**
-   - [Vault](https://www.spigotmc.org/resources/vault.34315/) (required, included in `lib/`)
-   - [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) (optional, for advanced message placeholders)
-   - [LuckPerms](https://luckperms.net/) (optional, for player prefix display)
-3. **Start your server.** PiratesCore will generate default configuration files in `plugins/PiratesCore/`.
-4. **Edit configuration files** as needed (see below).
-5. **Use in-game commands** to reload configs or manage features.
+## Commands
+
+| Command                | Description                                                      |
+|------------------------|------------------------------------------------------------------|
+| `/pirates reload`      | Reload all configs and chat filter                               |
+| `/pirates updatesql`   | Reload SQL config and update all player stats (if enabled)        |
+| `/show`                | Broadcast the item you're holding (with LuckPerms prefix/lore)    |
+| `/oremining toggle`    | Toggle ore mining notifications                                  |
+| `/oremining stats`     | View your mining stats (or another's, if admin)                  |
+| `/oremining top`       | Show top miners leaderboard                                      |
+| `/oremining ignore`    | Manage ignore lists (admin only)                                 |
 
 ---
 
-## Usage
+## Configuration
 
-### Main Commands
-- `/pirates reload` — Reload all configs and chat filter.
-- `/show` — Broadcast the item you're holding, with LuckPerms prefix and item lore support.
-- `/oremining` — Manage ore mining features:
-  - `/oremining toggle` — Toggle notifications
-  - `/oremining stats` — View your mining stats
-  - `/oremining top` — Show top miners
-  - `/oremining ignore` — Manage ignore lists
-
-### Example Configuration Files
-
-#### `OreMining.yml`
+Example: `OreMining.yml`
 ```yaml
 tracked-blocks:
   - DIAMOND_ORE
@@ -61,21 +76,23 @@ alert-threshold: 5
 message-format: "&b{player} found {amount} {block}!"
 ```
 
-#### `Settings.yml`
+Example: `Settings.yml`
 ```yaml
 features:
   BetterMending: true
   OreMining: true
+  ChatFilter: true
+  Stats: true
 ```
 
-#### `Webhook.yml`
+Example: `Webhook.yml`
 ```yaml
 discord:
   url: "https://discord.com/api/webhooks/..."
   embed: true
 ```
 
-#### `BadWords.yml`
+Example: `BadWords.yml`
 ```yaml
 bad-words:
   - badword1
@@ -96,22 +113,6 @@ bad-words:
 
 ---
 
-## Building from Source
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/birajrai/PiratesCore.git
-   cd PiratesCore
-   ```
-2. **Build with Maven:**
-   ```sh
-   mvn clean package
-   ```
-   The compiled JAR will be in the `target/` directory.
-
-> **Note:** Every push and pull request is automatically built and tested using [GitHub Actions](https://github.com/birajrai/PiratesCore/actions) with Maven. Check the badge above for the current build status.
-
----
-
 ## Extending PiratesCore
 - **Add a new feature:**
   1. Implement a Listener.
@@ -128,7 +129,7 @@ bad-words:
 ---
 
 ## Developer Notes
-- **Database:** Uses H2 embedded database for mining stats.
+- **Database:** Uses H2 embedded database for mining stats; MySQL support for player stats.
 - **Async Operations:** Database and webhook operations are asynchronous to avoid blocking the main server thread.
 - **PlaceholderAPI:** Optional support for advanced message placeholders.
 - **LuckPerms:** Used for player prefix display in chat/item broadcasts.
@@ -136,4 +137,4 @@ bad-words:
 ---
 
 ## License
-[MIT](LICENSE) (or specify your license here)
+[MIT](LICENSE)
