@@ -38,6 +38,10 @@ public class PiratesCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§cYou don't have permission to use this command!");
                 return true;
             }
+            if (!plugin.getFeatureManager().isFeatureEnabled("Stats")) {
+                sender.sendMessage("§c[PiratesAddons] Stats feature is disabled in the config. Enable it to use this command.");
+                return true;
+            }
             try {
                 plugin.getPlayerStatsHandler().reloadConfig(plugin.getConfigManager());
                 // Save/update all tables for all online players
