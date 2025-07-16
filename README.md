@@ -4,8 +4,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-birajrai%2FPiratesCore-blue?logo=github)](https://github.com/birajrai/PiratesCore)
 
+> ⚓️ Supercharge your Minecraft server with modular features, smart mining alerts, and seamless Discord integration—all in one plugin!
+
 ## Overview
-PiratesCore is a modular Minecraft plugin for Spigot/Paper servers, providing advanced ore mining notifications, chat filtering, and quality-of-life features for both administrators and players. The plugin is designed for extensibility and seamless integration with external services such as Discord webhooks.
+- Modular Minecraft plugin for Spigot/Paper servers
+- Advanced ore mining notifications (real-time and batched)
+- Mining statistics tracking and display
+- Chat filtering with configurable bad words list
+- Quality-of-life features for admins and players
+- Extensible via FeatureManager for easy addition of new features/listeners
+- Seamless integration with external services (e.g., Discord webhooks)
 
 ---
 
