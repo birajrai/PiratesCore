@@ -4,3 +4,4 @@ features:
   BetterMending: true
   OreMining: true 
   ChatFilter: true 
+  Stats: true 
