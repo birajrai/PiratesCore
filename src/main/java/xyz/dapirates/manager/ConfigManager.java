@@ -52,6 +52,7 @@ public class ConfigManager {
         webhookManager.reloadConfig();
         plugin.getFeatureManager().getChatFilterListener().reload();
         plugin.getFeatureManager().reloadSettings();
+        plugin.reloadPlugin();
         plugin.getLogger().info("All configs reloaded.");
     }
 
