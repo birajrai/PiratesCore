@@ -7,7 +7,6 @@ import org.bukkit.Location;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import xyz.dapirates.service.MiningSession;
 
 public class OreMiningWebhook {
     private final Core plugin;
