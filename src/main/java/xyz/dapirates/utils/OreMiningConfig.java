@@ -7,7 +7,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import xyz.dapirates.core.Core;
-import xyz.dapirates.service.OreMiningData;
 import xyz.dapirates.utils.ConfigUtils;
 import xyz.dapirates.manager.MessageManager;
 
