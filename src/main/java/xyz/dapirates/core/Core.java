@@ -2,7 +2,6 @@ package xyz.dapirates.core;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.dapirates.listener.OreMiningListener;
-import xyz.dapirates.listener.ChatFilterListener;
 import xyz.dapirates.manager.CommandManager;
 import xyz.dapirates.manager.FeatureManager;
 import xyz.dapirates.manager.DatabaseManager;
