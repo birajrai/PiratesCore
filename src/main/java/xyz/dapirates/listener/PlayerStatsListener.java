@@ -35,9 +35,14 @@ public class PlayerStatsListener implements Listener {
         this.statsHandler = plugin.getPlayerStatsHandler();
     }
 
+    private boolean isStatsEnabled() {
+        return plugin.getFeatureManager().isFeatureEnabled("Stats");
+    }
+
     // Save balance and balancetop to MySQL on player join
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!isStatsEnabled()) return;
         Player player = event.getPlayer();
         String name = player.getName();
         // Increment join count
@@ -55,6 +60,7 @@ public class PlayerStatsListener implements Listener {
     // Save playtime, balance, and leave count to MySQL on player quit
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (!isStatsEnabled()) return;
         Player player = event.getPlayer();
         String name = player.getName();
         // Playtime in ticks; convert to seconds
@@ -73,6 +79,7 @@ public class PlayerStatsListener implements Listener {
     // Track boat mount
     @EventHandler(priority = EventPriority.MONITOR)
     public void onVehicleEnter(VehicleEnterEvent event) {
+        if (!isStatsEnabled()) return;
         if (event.getEntered() instanceof Player && event.getVehicle() instanceof Boat) {
             Player player = (Player) event.getEntered();
             String name = player.getName();
@@ -85,6 +92,7 @@ public class PlayerStatsListener implements Listener {
     // Track boat leave
     @EventHandler(priority = EventPriority.MONITOR)
     public void onVehicleExit(VehicleExitEvent event) {
+        if (!isStatsEnabled()) return;
         if (event.getExited() instanceof Player && event.getVehicle() instanceof Boat) {
             Player player = (Player) event.getExited();
             String name = player.getName();
@@ -97,6 +105,7 @@ public class PlayerStatsListener implements Listener {
     // Save kills/deaths to MySQL on player death
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        if (!isStatsEnabled()) return;
         Player deceased = event.getEntity();
         Player killer = deceased.getKiller();
         if (killer != null && !killer.equals(deceased)) {
