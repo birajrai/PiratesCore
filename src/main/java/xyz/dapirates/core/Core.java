@@ -44,8 +44,10 @@ public class Core extends JavaPlugin {
         // Register commands
         commandManager.registerCommands(oreMiningListener);
 
-        // Register player stats listener
-        getServer().getPluginManager().registerEvents(new xyz.dapirates.listener.PlayerStatsListener(this), this);
+        // Register player stats listener only if Stats feature is enabled
+        if (featureManager.isFeatureEnabled("Stats")) {
+            getServer().getPluginManager().registerEvents(new xyz.dapirates.listener.PlayerStatsListener(this), this);
+        }
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
     }
@@ -87,9 +89,12 @@ public class Core extends JavaPlugin {
         // Initialize ore mining feature after managers
         oreMiningListener = new OreMiningListener(this);
 
-        // Initialize player stats handler (replace with config values)
-        // TODO: Load these values from a config file
-        playerStatsHandler = new PlayerStatsHandler(this, configManager);
+        // Initialize player stats handler only if Stats feature is enabled
+        if (featureManager.isFeatureEnabled("Stats")) {
+            playerStatsHandler = new PlayerStatsHandler(this, configManager);
+        } else {
+            playerStatsHandler = null;
+        }
     }
 
     private boolean setupEconomy() {
@@ -142,5 +147,25 @@ public class Core extends JavaPlugin {
 
     public PlayerStatsHandler getPlayerStatsHandler() {
         return playerStatsHandler;
+    }
+
+    public void reloadPlugin() {
+        try {
+            // Unregister all listeners and commands if needed (not implemented here, but should be for full safety)
+            // Re-initialize managers and listeners
+            initializeManagers();
+            // Re-register features
+            featureManager.registerFeatures();
+            // Re-register commands
+            commandManager.registerCommands(oreMiningListener);
+            // Register or unregister PlayerStatsListener according to the current 'Stats' toggle
+            if (featureManager.isFeatureEnabled("Stats")) {
+                getServer().getPluginManager().registerEvents(new xyz.dapirates.listener.PlayerStatsListener(this), this);
+            }
+            getLogger().info("Plugin reloaded and features re-evaluated according to config.");
+        } catch (Exception e) {
+            getLogger().severe("Error during plugin reload: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
