@@ -11,7 +11,6 @@ import xyz.dapirates.utils.ConfigUtils;
 import xyz.dapirates.manager.MessageManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
