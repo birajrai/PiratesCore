@@ -45,7 +45,13 @@ public class Core extends JavaPlugin {
 
         // Register player stats listener only if Stats feature is enabled
         if (featureManager.isFeatureEnabled("Stats")) {
-            getServer().getPluginManager().registerEvents(new xyz.dapirates.listener.PlayerStatsListener(this), this);
+            xyz.dapirates.listener.PlayerStatsListener statsListener = new xyz.dapirates.listener.PlayerStatsListener(this);
+            // Inject StatsTopGUI
+            xyz.dapirates.command.StatsTopGUI topGUI = (xyz.dapirates.command.StatsTopGUI) commandManager.getCommand("topgui");
+            if (topGUI != null) {
+                statsListener.setStatsTopGUI(topGUI);
+            }
+            getServer().getPluginManager().registerEvents(statsListener, this);
         }
 
         getLogger().info("Core plugin enabled, BetterMending and OreMining registered!");
