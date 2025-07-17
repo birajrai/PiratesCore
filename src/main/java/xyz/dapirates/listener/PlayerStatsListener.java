@@ -30,7 +30,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import xyz.dapirates.command.StatsTopGUI;
+import xyz.dapirates.pirates.StatsTopGUI;
 
 public class PlayerStatsListener implements Listener {
     private final Core plugin;
