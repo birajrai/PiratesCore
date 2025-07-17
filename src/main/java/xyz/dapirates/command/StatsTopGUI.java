@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public class StatsTopGUI implements CommandExecutor {
     private final Core plugin;
     private final PlayerStatsHandler statsHandler;
-    private static final List<String> ORES = Arrays.asList(
+    public static final List<String> ORES = Arrays.asList(
         "DIAMOND_ORE", "DEEPSLATE_DIAMOND_ORE",
         "IRON_ORE", "DEEPSLATE_IRON_ORE",
         "GOLD_ORE", "DEEPSLATE_GOLD_ORE",
@@ -29,7 +29,7 @@ public class StatsTopGUI implements CommandExecutor {
         "REDSTONE_ORE", "DEEPSLATE_REDSTONE_ORE",
         "COPPER_ORE", "DEEPSLATE_COPPER_ORE"
     );
-    private static final List<String> MOBS = Arrays.asList(
+    public static final List<String> MOBS = Arrays.asList(
         "ZOMBIE", "CREEPER", "SKELETON", "SPIDER", "WITCH"
     );
 
@@ -75,7 +75,7 @@ public class StatsTopGUI implements CommandExecutor {
 
     // Example: open blocks leaderboard
     public void openBlocksTop(Player player) {
-        statsHandler.getTopNBlocksBrokenAsync(10).thenAccept(list -> {
+        getTopNBlocksBrokenAsync(10).thenAccept(list -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Inventory inv = Bukkit.createInventory(null, 18, "Top Blocks Broken");
                 int slot = 0;
@@ -95,7 +95,7 @@ public class StatsTopGUI implements CommandExecutor {
         });
     }
     public void openOresTop(Player player, String ore) {
-        statsHandler.getTopNOreBrokenAsync(ore, 10).thenAccept(list -> {
+        getTopNOreBrokenAsync(ore, 10).thenAccept(list -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Inventory inv = Bukkit.createInventory(null, 18, "Top Ores: " + ore);
                 int slot = 0;
@@ -115,7 +115,7 @@ public class StatsTopGUI implements CommandExecutor {
         });
     }
     public void openMobsTop(Player player, String mob) {
-        statsHandler.getTopNMobKillsAsync(mob, 10).thenAccept(list -> {
+        getTopNMobKillsAsync(mob, 10).thenAccept(list -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Inventory inv = Bukkit.createInventory(null, 18, "Top Mobs: " + mob);
                 int slot = 0;
@@ -133,5 +133,38 @@ public class StatsTopGUI implements CommandExecutor {
                 player.openInventory(inv);
             });
         });
+    }
+
+    // --- Added implementations ---
+    public CompletableFuture<List<Map.Entry<String, Integer>>> getTopNBlocksBrokenAsync(int n) {
+        return plugin.getDatabaseManager().getTopPlayersAsync(n).thenApply(statsList -> {
+            List<Map.Entry<String, Integer>> result = new ArrayList<>();
+            for (var stats : statsList) {
+                String name = Bukkit.getOfflinePlayer(stats.getPlayerId()).getName();
+                if (name == null) name = stats.getPlayerId().toString();
+                result.add(new AbstractMap.SimpleEntry<>(name, stats.getTotalBlocks()));
+            }
+            result.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+            return result.size() > n ? result.subList(0, n) : result;
+        });
+    }
+    public CompletableFuture<List<Map.Entry<String, Integer>>> getTopNOreBrokenAsync(String ore, int n) {
+        Material mat = Material.getMaterial(ore);
+        if (mat == null) return CompletableFuture.completedFuture(Collections.emptyList());
+        return plugin.getDatabaseManager().getTopPlayersAsync(100).thenApply(statsList -> {
+            List<Map.Entry<String, Integer>> result = new ArrayList<>();
+            for (var stats : statsList) {
+                String name = Bukkit.getOfflinePlayer(stats.getPlayerId()).getName();
+                if (name == null) name = stats.getPlayerId().toString();
+                int count = stats.getBlockCount(mat);
+                if (count > 0) result.add(new AbstractMap.SimpleEntry<>(name, count));
+            }
+            result.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+            return result.size() > n ? result.subList(0, n) : result;
+        });
+    }
+    public CompletableFuture<List<Map.Entry<String, Integer>>> getTopNMobKillsAsync(String mob, int n) {
+        // Not implemented: No mob kill tracking in OreMiningStats/DatabaseManager
+        return CompletableFuture.completedFuture(Collections.emptyList());
     }
 }
