@@ -13,6 +13,7 @@ import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.manager.PlayerStatsHandler;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import xyz.dapirates.pirates.StatsTopGUI;
 
 public class Core extends JavaPlugin {
 
@@ -47,7 +48,7 @@ public class Core extends JavaPlugin {
         if (featureManager.isFeatureEnabled("Stats")) {
             xyz.dapirates.listener.PlayerStatsListener statsListener = new xyz.dapirates.listener.PlayerStatsListener(this);
             // Inject StatsTopGUI
-            xyz.dapirates.command.StatsTopGUI topGUI = (xyz.dapirates.command.StatsTopGUI) commandManager.getCommand("topgui");
+            xyz.dapirates.pirates.StatsTopGUI topGUI = (xyz.dapirates.pirates.StatsTopGUI) commandManager.getCommand("topgui");
             if (topGUI != null) {
                 statsListener.setStatsTopGUI(topGUI);
             }
