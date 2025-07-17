@@ -20,6 +20,17 @@ import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.entity.Boat;
 import java.util.HashMap;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import java.sql.Timestamp;
+import java.time.Instant;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import xyz.dapirates.command.StatsTopGUI;
 
 public class PlayerStatsListener implements Listener {
     private final Core plugin;
@@ -29,6 +40,11 @@ public class PlayerStatsListener implements Listener {
     private final HashMap<String, Integer> joinCounts = new HashMap<>();
     private final HashMap<String, Integer> boatCounts = new HashMap<>();
     private final HashMap<String, Integer> leaveBoatCounts = new HashMap<>();
+
+    private StatsTopGUI statsTopGUI;
+    public void setStatsTopGUI(StatsTopGUI statsTopGUI) {
+        this.statsTopGUI = statsTopGUI;
+    }
 
     public PlayerStatsListener(Core plugin) {
         this.plugin = plugin;
@@ -145,5 +161,61 @@ public class PlayerStatsListener implements Listener {
         List<Player> topPlayers = onlinePlayers.subList(0, topN);
         statsHandler.updateTopBalanceLeaderboard(topPlayers, econ);
         updateAllTops(topPlayers);
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) event.getWhoClicked();
+        Inventory inv = event.getView().getTopInventory();
+        if (inv == null || event.getView().getTitle() == null) return;
+        String title = event.getView().getTitle();
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null || !clicked.hasItemMeta()) return;
+        ItemMeta meta = clicked.getItemMeta();
+        if (!meta.hasDisplayName()) return;
+        String name = meta.getDisplayName();
+        if (title.equals("Leaderboards")) {
+            event.setCancelled(true);
+            if (name.equals("Blocks Broken")) {
+                statsTopGUI.openBlocksTop(player);
+            } else if (name.equals("Ores Broken")) {
+                // Open ore selection menu
+                Inventory oresMenu = Bukkit.createInventory(null, 18, "Pick Ore");
+                for (int i = 0; i < StatsTopGUI.ORES.size(); i++) {
+                    String ore = StatsTopGUI.ORES.get(i);
+                    Material mat = Material.getMaterial(ore);
+                    if (mat != null) {
+                        ItemStack oreItem = new ItemStack(mat);
+                        ItemMeta oreMeta = oreItem.getItemMeta();
+                        oreMeta.setDisplayName(ore);
+                        oreItem.setItemMeta(oreMeta);
+                        oresMenu.setItem(i, oreItem);
+                    }
+                }
+                player.openInventory(oresMenu);
+            } else if (name.equals("Mob Kills")) {
+                // Open mob selection menu
+                Inventory mobsMenu = Bukkit.createInventory(null, 9, "Pick Mob");
+                String[] mobs = {"ZOMBIE", "CREEPER", "SKELETON", "SPIDER", "WITCH"};
+                Material[] icons = {Material.ZOMBIE_HEAD, Material.CREEPER_HEAD, Material.SKELETON_SKULL, Material.SPIDER_EYE, Material.POTION};
+                for (int i = 0; i < mobs.length; i++) {
+                    ItemStack mobItem = new ItemStack(icons[i]);
+                    ItemMeta mobMeta = mobItem.getItemMeta();
+                    mobMeta.setDisplayName(mobs[i]);
+                    mobItem.setItemMeta(mobMeta);
+                    mobsMenu.setItem(i, mobItem);
+                }
+                player.openInventory(mobsMenu);
+            }
+        } else if (title.equals("Pick Ore")) {
+            event.setCancelled(true);
+            statsTopGUI.openOresTop(player, name);
+        } else if (title.equals("Pick Mob")) {
+            event.setCancelled(true);
+            statsTopGUI.openMobsTop(player, name);
+        } else if (title.startsWith("Top Blocks Broken") || title.startsWith("Top Ores:") || title.startsWith("Top Mobs:")) {
+            event.setCancelled(true);
+        }
     }
 } 
