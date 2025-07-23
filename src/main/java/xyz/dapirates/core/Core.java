@@ -13,7 +13,6 @@ import xyz.dapirates.utils.OreMiningConfig;
 import xyz.dapirates.manager.PlayerStatsHandler;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import xyz.dapirates.pirates.StatsTopGUI;
 
 public class Core extends JavaPlugin {
 
@@ -47,11 +46,6 @@ public class Core extends JavaPlugin {
         // Register player stats listener only if Stats feature is enabled
         if (featureManager.isFeatureEnabled("Stats")) {
             xyz.dapirates.listener.PlayerStatsListener statsListener = new xyz.dapirates.listener.PlayerStatsListener(this);
-            // Inject StatsTopGUI
-            xyz.dapirates.pirates.StatsTopGUI topGUI = (xyz.dapirates.pirates.StatsTopGUI) commandManager.getCommand("topgui");
-            if (topGUI != null) {
-                statsListener.setStatsTopGUI(topGUI);
-            }
             getServer().getPluginManager().registerEvents(statsListener, this);
         }
 
@@ -98,6 +92,11 @@ public class Core extends JavaPlugin {
         // Initialize player stats handler only if Stats feature is enabled
         if (featureManager.isFeatureEnabled("Stats")) {
             playerStatsHandler = new PlayerStatsHandler(this, configManager);
+            // Register BountyHuntersListener if BountyHunters is present
+            if (getServer().getPluginManager().getPlugin("BountyHunters") != null) {
+                getServer().getPluginManager().registerEvents(
+                    new xyz.dapirates.manager.BountyHuntersListener(playerStatsHandler), this);
+            }
         } else {
             playerStatsHandler = null;
         }

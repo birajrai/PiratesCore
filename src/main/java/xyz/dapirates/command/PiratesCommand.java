@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.Collections;
 import org.bukkit.OfflinePlayer;
+import net.Indyuce.bountyhunters.BountyHunters;
+import net.Indyuce.bountyhunters.api.Bounty;
+import net.Indyuce.bountyhunters.manager.BountyManager;
 
 public class PiratesCommand implements CommandExecutor, TabCompleter {
     private final Core plugin;
@@ -44,16 +47,35 @@ public class PiratesCommand implements CommandExecutor, TabCompleter {
             }
             try {
                 plugin.getPlayerStatsHandler().reloadConfig(plugin.getConfigManager());
-                // Save/update all tables for all online players
                 Economy econ = plugin.getEconomy();
-                plugin.getPlayerStatsHandler().saveAllOnlinePlayerStats(econ);
-                // Also update balancetop leaderboard
-                if (econ != null) {
-                    List<Player> onlinePlayers = Bukkit.getOnlinePlayers().stream().collect(Collectors.toList());
-                    onlinePlayers.sort(Comparator.comparingDouble(p -> econ.getBalance((OfflinePlayer)p)).reversed());
-                    int topN = Math.min(10, onlinePlayers.size());
-                    List<Player> topPlayers = onlinePlayers.subList(0, topN);
-                    plugin.getPlayerStatsHandler().updateTopBalanceLeaderboard(topPlayers, econ);
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    String name = player.getName();
+                    String uuid = player.getUniqueId().toString();
+                    plugin.getPlayerStatsHandler().upsertPlayerAsync(name, uuid);
+                    // Playtime in seconds
+                    long playtimeTicks = player.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE);
+                    long playtimeSeconds = playtimeTicks / 20L;
+                    plugin.getPlayerStatsHandler().saveStatAsync("playtime", name, playtimeSeconds);
+                    // Balance
+                    if (econ != null) {
+                        double balance = econ.getBalance(player);
+                        plugin.getPlayerStatsHandler().saveStatAsync("balance", name, (long) balance);
+                    }
+                    // Joined (for demo, increment by 1)
+                    plugin.getPlayerStatsHandler().loadStatAsync("joined", name).thenAccept(joined -> {
+                        plugin.getPlayerStatsHandler().saveStatAsync("joined", name, joined + 1);
+                    });
+                    // Boat mount (for demo, not tracked here)
+                    // Add more stats as needed
+                }
+                // --- BountyHunters: Update all current bounties ---
+                if (plugin.getServer().getPluginManager().getPlugin("BountyHunters") != null) {
+                    BountyManager bountyManager = BountyHunters.getInstance().getBountyManager();
+                    for (Bounty bounty : bountyManager.getBounties()) {
+                        OfflinePlayer target = bounty.getTarget();
+                        double reward = bounty.getReward();
+                        plugin.getPlayerStatsHandler().saveTopBountyAsync(target.getName(), (long) reward);
+                    }
                 }
                 sender.sendMessage("§a[PiratesAddons] SQL config reloaded, all player stats and tables updated!");
             } catch (Exception e) {
